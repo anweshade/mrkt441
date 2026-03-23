@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRKT 441 — Projector</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#ffffff;--surface2:#f0eeea;--border:#e2dfd8;--purple:#5b4fe8;--purple-light:#7c6af7;--purple-bg:#eeecfe;--teal:#0d9e7a;--teal-bg:#e4f7f1;--coral:#e05a3a;--coral-bg:#fdf0ec;--amber:#c47f0a;--amber-bg:#fef6e4;--red:#dc2626;--green:#16a34a;--green-bg:#edfaf3;--text:#1a1a2e;--muted:#6b6b8a;--dim:#c5c3bb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1.5px solid var(--border);background:var(--surface);gap:12px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.game-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:.04em;color:var(--purple)}
+.game-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.tabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:4px;border:1.5px solid var(--border)}
+.tab{padding:7px 14px;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s}
+.tab.on{background:var(--purple);color:#fff;box-shadow:0 1px 6px rgba(91,79,232,.25)}
+.tab:hover:not(.on){color:var(--text);background:var(--surface2)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-right:6px;animation:pulse 1.5s infinite}
+.live-dot.connected{background:var(--teal);animation:none}
+
+/* SCOREBOARD */
+.scoreboard{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:12px 1.5rem;background:var(--surface);border-bottom:1.5px solid var(--border)}
+.scard{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;position:relative;transition:all .3s}
+.scard.lead{border-color:var(--amber);background:var(--amber-bg)}
+
+.scard.submitted{border-color:var(--purple);background:var(--purple-bg)}
+.crown{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:16px;animation:bounce .6s ease infinite alternate}
+@keyframes bounce{from{transform:translateX(-50%) translateY(0)}to{transform:translateX(-50%) translateY(-3px)}}
+.sg{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.sname{font-size:11px;color:var(--text);font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spts{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--purple);line-height:1}
+.sadj{display:flex;justify-content:center;gap:4px;margin-top:6px}
+.sadj button{width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);line-height:1;transition:all .15s}
+.sadj button.plus:hover{background:var(--purple);color:#fff;border-color:var(--purple)}
+.sadj button.minus:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.sub-badge{font-size:9px;color:var(--teal);font-weight:700;text-transform:uppercase;margin-top:1px;letter-spacing:.04em}
+
+/* MAIN */
+.main{padding:1.25rem 1.5rem}
+.section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;font-family:'Syne',sans-serif}
+
+/* GROUP GRID */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.bcard{border:1.5px solid var(--border);border-radius:10px;padding:.875rem;cursor:pointer;background:var(--surface);transition:all .2s}
+.bcard:hover{border-color:var(--purple);transform:translateY(-1px);box-shadow:0 2px 12px rgba(91,79,232,.1)}
+.bcard.on{border:2px solid var(--purple);background:var(--purple-bg)}
+.bcard.submitted{border-color:var(--teal);background:var(--teal-bg)}
+
+.bnum{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.bname{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text)}
+.bstat{font-size:11px;margin-top:3px;color:var(--muted)}
+.bstat.ok{color:var(--teal);font-weight:600}
+
+.bstat.waiting{color:var(--dim)}
+
+/* CANVAS */
+.canvas{border:1.5px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 2px 16px rgba(0,0,0,.06)}
+.chead{background:var(--purple);padding:1rem 1.25rem;border-bottom:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.cgnum{font-size:11px;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.cbname{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff}
+.ctagline{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+
+.cbrief{padding:1rem 1.25rem;background:var(--surface2);border-bottom:1.5px solid var(--border)}
+.cpara{font-size:13px;line-height:1.75;color:#3a3a55;margin-bottom:10px}
+.ctags{display:flex;flex-wrap:wrap;gap:6px}
+.ctag{font-size:11px;background:var(--surface);color:var(--muted);padding:3px 10px;border-radius:20px;border:1.5px solid var(--border)}
+.cfields{display:grid;grid-template-columns:1fr 1fr}
+.cfield{padding:.875rem 1.1rem;border-right:1.5px solid var(--border);border-bottom:1.5px solid var(--border);background:var(--surface)}
+.cfield:nth-child(even){border-right:none}
+.cflbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.cfield-val{font-size:14px;line-height:1.65;color:var(--text);min-height:48px;white-space:pre-wrap}
+.cfield-empty{font-size:13px;color:var(--dim);font-style:italic}
+.cnav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.1rem;background:var(--surface2);border-top:1.5px solid var(--border);flex-wrap:wrap;gap:8px}
+.cnav-right{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+button.nb{font-size:12px;padding:7px 12px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s}
+button.nb:hover{border-color:var(--purple);color:var(--purple)}
+button.pb{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;background:var(--purple);color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s}
+button.pb:hover{background:#4a3ed4;box-shadow:0 2px 8px rgba(91,79,232,.25)}
+button.gb{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;transition:all .15s}
+button.gb:hover{background:#15803d}
+button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;background:var(--coral);color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s}
+button.ob:hover{background:#c44a2c}
+
+/* VOTE */
+.vote-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.vbtn{padding:.875rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;background:var(--surface);font-size:13px;font-weight:600;color:var(--text);text-align:center;font-family:'DM Sans',sans-serif;transition:all .2s}
+.vbtn:hover{border-color:var(--purple);transform:translateY(-1px);box-shadow:0 2px 10px rgba(91,79,232,.1)}
+.vbtn.voted{border-color:var(--purple);background:var(--purple-bg);color:var(--purple)}
+.vote-result{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.vrlabel{font-size:12px;font-weight:600;color:var(--text);min-width:72px}
+.vrbar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.vrfill{height:100%;background:var(--purple);border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.vrnum{font-size:12px;color:var(--muted);min-width:20px;text-align:right}
+.steal-panel{border:1.5px solid var(--coral);border-radius:12px;overflow:hidden;margin-top:1rem}
+.steal-head{background:var(--coral);color:#fff;padding:.75rem 1.1rem;font-size:13px;font-weight:700;font-family:'Syne',sans-serif}
+.steal-body{padding:1rem 1.1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+.steal-body select{padding:7px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+
+/* BONUS */
+.bonus-card{border:1.5px solid #fca5a5;border-radius:14px;overflow:hidden;margin-bottom:1rem;box-shadow:0 2px 12px rgba(220,38,38,.08)}
+.bonus-head{background:var(--red);color:#fff;padding:.875rem 1.25rem;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;display:flex;justify-content:space-between;align-items:center}
+.bonus-body{padding:1.25rem;background:var(--surface)}
+.bonus-q{font-size:20px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);line-height:1.55;margin-bottom:1.1rem}
+.bonus-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.bopt{padding:1rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);background:var(--surface2);text-align:left;line-height:1.45;font-family:'DM Sans',sans-serif;transition:all .2s}
+.bopt:hover:not(:disabled){border-color:var(--purple);background:var(--purple-bg)}
+.bopt.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.bopt.wrong{border-color:var(--red);background:#fef2f2;color:var(--red)}
+.bopt:disabled{cursor:default}
+.reveal-note{font-size:13px;color:var(--muted);line-height:1.7;padding:1rem;background:var(--surface2);border-radius:8px;border-left:3px solid var(--purple)}
+.bonus-nav{display:flex;gap:8px;margin-bottom:1rem;align-items:center}
+.qcounter{font-size:13px;color:var(--muted);margin-right:auto}
+.pts-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+
+/* DISCUSSION */
+.dlist{display:flex;flex-direction:column;gap:8px}
+.dq{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);transition:border .2s;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.dq.on{border-color:var(--purple);box-shadow:0 2px 12px rgba(91,79,232,.1)}
+.dqhead{display:flex;align-items:flex-start;gap:10px;padding:1rem 1.1rem;cursor:pointer;transition:background .15s}
+.dqhead:hover{background:var(--surface2)}
+.dqtag{flex-shrink:0;font-size:10px;font-weight:800;padding:3px 9px;border-radius:5px;margin-top:2px;text-transform:uppercase;letter-spacing:.05em;font-family:'Syne',sans-serif}
+.dqtext{flex:1;font-size:15px;font-weight:500;line-height:1.6;color:var(--text)}
+.dqarrow{font-size:18px;color:var(--muted);flex-shrink:0;display:inline-block;transition:transform .2s}
+.dqbody{border-top:1.5px solid var(--border)}
+.bigq{padding:1.75rem 2rem;border-bottom:1.5px solid var(--border);background:var(--purple-bg)}
+.bqeye{font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;font-family:'Syne',sans-serif}
+.bqtext{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;line-height:1.6;color:var(--text)}
+.notewrap{padding:1rem 1.25rem;display:flex;gap:14px;border-bottom:1.5px solid var(--border);background:var(--surface2)}
+.notelbl{font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;padding-top:2px;font-family:'Syne',sans-serif}
+.notetext{font-size:13px;color:var(--muted);line-height:1.65}
+.dqact{padding:.875rem 1.1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface)}
+.disc-note{font-size:11px;color:var(--muted)}
+.empty-state{text-align:center;padding:2.5rem;font-size:14px;color:var(--muted);border:1.5px dashed var(--dim);border-radius:14px;background:var(--surface)}
+.info-bar{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.875rem 1.1rem;font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.info-bar strong{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <div class="game-title">Social Media Strategy Game <span class="live-dot" id="live-dot"></span><span id="live-label" style="font-size:11px;color:var(--muted)">Connecting...</span></div>
+    <div class="game-sub">MRKT 441 · Projector view · 6 groups of 4</div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="setTab('task')">Strategy task</button>
+    <button class="tab" onclick="setTab('vote')">Vote</button>
+    <button class="tab" onclick="setTab('bonus')">Bonus round</button>
+    <button class="tab" onclick="setTab('discuss')">Discussion</button>
+  </div>
+<div class="scoreboard" id="sboard"></div>
+<div class="main" id="screen"></div>
+<div style="padding:.75rem 1.5rem;border-top:1.5px solid var(--border);background:var(--surface);display:flex;justify-content:flex-end;">
+  <button onclick="resetClass()" style="font-size:12px;padding:6px 14px;border:1.5px solid #fca5a5;border-radius:7px;cursor:pointer;background:#fff;color:var(--red);font-family:'DM Sans',sans-serif;font-weight:600;">Reset for next class</button>
+</div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getDatabase,ref,onValue,remove}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyDemo-ReplaceWithYours",authDomain:"mrkt441-game.firebaseapp.com",databaseURL:"https://mrkt441-game-default-rtdb.firebaseio.com",projectId:"mrkt441-game",storageBucket:"mrkt441-game.appspot.com",messagingSenderId:"000000000000",appId:"1:000000000000:web:0000000000000000"};
+const app=initializeApp(firebaseConfig);const db=getDatabase(app);
+const brands=[
+  {name:'Groundwork Coffee',tagline:'Regional roaster, big ambitions',para:'Groundwork started in a garage in Columbus, Ohio eight years ago. Today they have two cafes and a loyal following. They just secured investment to open eight new locations across the Midwest in 18 months. Problem: outside Columbus, nobody knows them.',tags:['Goal: awareness in new cities','Audience: 25–45, urban, values-driven','Budget: limited','No marketing hire yet']},
+  {name:'FitNest',tagline:'Online personal training, no gym required',para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. Grew fast in the pandemic but now faces fierce competition. Their edge is real personalisation. Critical: FitNest has zero physical presence — social media is their entire storefront.',tags:['Goal: grow subscriptions, cut churn','Audience: 28–42, results-focused','Budget: moderate','Trust built entirely online']},
+  {name:'Pawprint Rescue',tagline:'Non-profit shelter, zero ad budget',para:'Small non-profit shelter in Austin, TX. Takes animals other shelters cannot. Runs on volunteers and donations. Goal: double adoptions this year. Catch: zero paid advertising budget. Greatest asset: every animal has a story.',tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited capacity']},
+  {name:'CleanSlate Skincare',tagline:'Legacy brand, brand new audience',para:'In pharmacies for 15 years. Now launching for Gen Z (16–24) — a demographic they have never reached. Built around skin-positive messaging. Core challenge: seen as a parent\'s brand. Must earn credibility with an audience that distrusts corporate voices.',tags:['Goal: credibility with Gen Z','Audience: socially conscious, ad-sceptical','Budget: strong','Must not feel corporate']}
+];
+const allBrands=brands.slice(0,3).concat(brands.slice(0,3));
+const fieldDefs=[{key:'f0',label:'Objective',color:'#5b4fe8'},{key:'f1',label:'Platform(s)',color:'#0d9e7a'},{key:'f2',label:'Content idea',color:'#e05a3a'},{key:'f3',label:'Measure success',color:'#c47f0a'}];
+const bonusQs=[
+  {q:'A brand posts consistently but Facebook rarely shows content to followers. Most likely reason?',opts:['The account is not verified','Facebook penalises corporate posts unless they generate strong engagement','Not using enough hashtags','Organic reach only works on Instagram'],correct:1,note:'Platforms like Facebook algorithmically limit corporate content. Paid advertising is often needed alongside posting to reach new customers.'},
+  {q:'Pawprint Rescue gets a post shared 50,000 times without paying. What type of media is this?',opts:['Paid media','Owned media','Earned media','Co-created content'],correct:2,note:'Earned media is unpaid publicity — shares, press coverage, word of mouth. High upside but cannot be the sole foundation of a strategy.'},
+  {q:'FitNest has engagement up 40% but subscriptions are flat. Most likely cause?',opts:['Ads shown to wrong audience','Engagement and conversion are different stages — content entertains but does not drive purchase','Follower count is too low','Posting at the wrong time'],correct:1,note:'Engagement is necessary but not sufficient for sales. Entertainment content builds equity but utilitarian content drives conversion.'},
+  {q:'CleanSlate wants to reach Gen Z authentically. Most effective approach?',opts:['Polished TV-style ads repurposed for Instagram','User-generated content and influencer partnerships','Curated content from other brands','LinkedIn thought leadership'],correct:1,note:'Gen Z is sceptical of corporate messaging. UGC and peer voices carry far more credibility with this audience.'},
+  {q:'Which metric best measures whether a campaign drives loyalty, not just attention?',opts:['Total follower count','Number of impressions','Purchase frequency and repeat conversion rate','Number of likes per post'],correct:2,note:'Follower count and impressions measure reach. Loyalty is measured by behaviour — repeat purchases and direct attribution from social to conversion.'}
+];
+const discQs=[
+  {tag:'Compare',bg:'#eeecfe',tc:'#3730b8',q:'Groups 1 and 5 both had Groundwork Coffee. Did you pick the same platform? Compare reasoning — whose argument is stronger?',note:'Push past platform names. Why that choice for regional expansion on a tight budget?'},
+  {tag:'Debate',bg:'#fef2f2',tc:'#b91c1c',q:'Pawprint has zero ad budget. Real disadvantage — or does it force better marketing? Make the case either way.',note:'Earned media has huge upside but zero reliability. What would the group sacrifice with owned and earned only?'},
+  {tag:'Pressure',bg:'#fef6e4',tc:'#92400e',q:'Engagement up 40%, sales flat after 3 months. What does that tell you — and what would you change?',note:'Surfaces the engagement → loyalty gap. When does a metric stop being useful?'},
+  {tag:'Apply',bg:'#e4f7f1',tc:'#065f46',q:'FitNest has no physical location. How does that change what social media must do vs Groundwork Coffee?',note:'For FitNest, social IS the storefront. Does the objective or success metric change?'},
+  {tag:'Debate',bg:'#fef2f2',tc:'#b91c1c',q:'CleanSlate targets Gen Z who distrust ads. TikTok vs Instagram — which is stronger?',note:'Content style or strategic difference? Would answer shift with $500 vs $50k budget?'},
+  {tag:'Apply',bg:'#e4f7f1',tc:'#065f46',q:'A client asks: should we be on every platform? Your answer — and three questions you ask first.',note:'Objective-first thinking, audience fit, and content capacity.'}
+];
+let tab='task',openGroup=null,openQ=null,bonusAnswered=null,bonusIdx=0;
+let votes=[0,0,0,0,0,0],pts=[0,0,0,0,0,0],submissions={},hasVoted=false;
+window.addPts=(i,n)=>{pts[i]=Math.max(0,pts[i]+n);renderBoard();};
+window.resetClass=resetClass;
+window.setTab=setTab;window.castVote=castVote;window.awardVote=awardVote;window.resetVotes=resetVotes;window.doStealWin=doStealWin;window.doStealFail=doStealFail;window.answerBonus=answerBonus;
+onValue(ref(db,'submissions'),(snapshot)=>{
+  const prev={...submissions};submissions=snapshot.val()||{};
+  Object.keys(submissions).forEach(i=>{const idx=parseInt(i);if(submissions[i]?.submitted&&!prev[i]?.submitted){pts[idx]=(pts[idx]||0)+1;}});
+  renderBoard();renderScreen();
+  document.getElementById('live-dot').className='live-dot connected';
+  document.getElementById('live-label').textContent='Live';document.getElementById('live-label').style.color='var(--teal)';
+},(e)=>{document.getElementById('live-dot').className='live-dot';document.getElementById('live-label').textContent='Disconnected';});
+
+async function resetClass(){
+  if(!confirm('Reset everything for next class? This will wipe all submissions and scores.')) return;
+  try {
+    await remove(ref(db,'submissions'));
+    pts=[0,0,0,0,0,0];
+    votes=[0,0,0,0,0,0];
+    openGroup=null;
+    bonusAnswered=null;
+    bonusIdx=0;
+    openQ=null;
+    submissions={};
+    renderBoard();
+    renderScreen();
+    alert('Reset complete — ready for next class!');
+  } catch(e) {
+    alert('Error resetting database. Try deleting submissions manually in the Firebase console.');
+  }
+}
+
+function renderBoard(){
+  const max=Math.max(...pts);let h='';
+  for(let i=0;i<6;i++){
+    const lead=pts[i]===max&&max>0,sub=submissions[i]?.submitted;
+    h+=`<div class="scard${lead?' lead':''}${sub&&!lead?' submitted':''}">
+      ${lead?'<div class="crown">🏆</div>':''}
+      <div class="sg">G${i+1}</div><div class="sname">${allBrands[i].name.split(' ')[0]}</div>
+      ${sub?'<div class="sub-badge">✓ In</div>':''}
+      <div class="spts">${pts[i]}</div>
+      <div class="sadj"><button class="minus" onclick="addPts(${i},-1)">−</button><button class="plus" onclick="addPts(${i},1)">+</button></div>
+    </div>`;}
+  document.getElementById('sboard').innerHTML=h;
+}
+function setTab(t){
+  tab=t;document.querySelectorAll('.tab').forEach(b=>b.className='tab');
+  ['task','vote','bonus','discuss'].forEach((k,i)=>{if(k===t)document.querySelectorAll('.tab')[i].className='tab on';});
+  renderScreen();
+}
+
+function renderScreen(){if(tab==='task')renderTask();else if(tab==='vote')renderVote();else if(tab==='bonus')renderBonus();else renderDisc();}
+function renderTask(){
+  const s=document.getElementById('screen');
+  let h='<div class="section-label">Group submissions — click a card to view answers</div><div class="bgrid">';
+  allBrands.forEach((b,i)=>{
+    const sub=submissions[i]?.submitted,act=openGroup===i;
+    h+=`<div class="bcard${act?' on':''}${sub&&!act?' submitted':''}" id="gc${i}"><div class="bnum">Group ${i+1}</div><div class="bname">${b.name}</div><div class="bstat${sub?' ok':' waiting'}">${sub?'✓ Submitted':'Waiting...'}</div></div>`;
+  });
+  h+='</div>';
+  if(openGroup===null){h+='<div class="empty-state">Select a group card to view their submitted answers</div>';}
+  else{
+    const gi=openGroup,b=allBrands[gi],sub=submissions[gi],fields=sub?.fields||{};
+    h+=`<div class="canvas"><div class="chead"><div><div class="cgnum">Group ${gi+1}</div><div class="cbname">${b.name}</div><div class="ctagline">${b.tagline}</div></div></div>
+    <div class="cbrief"><p class="cpara">${b.para}</p><div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div>
+    <div class="cfields">${fieldDefs.map(f=>`<div class="cfield"><div class="cflbl" style="color:${f.color}">${f.label}</div>${fields[f.key]?`<div class="cfield-val">${fields[f.key]}</div>`:`<div class="cfield-empty">${sub?'Left blank':'Not submitted yet'}</div>`}</div>`).join('')}</div>
+    <div class="cnav"><button class="nb" onclick="openGroup=((${gi}-1)+6)%6;renderScreen()">← Prev</button><div class="cnav-right"><button class="nb" onclick="openGroup=(${gi}+1)%8;renderScreen()">Next →</button>${sub?`<button class="gb" onclick="addPts(${gi},3);alert('Group ${gi+1} vote win +3 pts')">Vote win (+3)</button><button class="pb" onclick="addPts(${gi},2);alert('Group ${gi+1} best content +2 pts')">Best content (+2)</button>`:'<span style="font-size:12px;color:var(--dim)">Awaiting submission...</span>'}</div></div></div>`;
+  }
+  s.innerHTML=h;
+  allBrands.forEach((b,i)=>{const el=document.getElementById('gc'+i);if(el)el.onclick=()=>{openGroup=i;renderTask();};});
+}
+function renderVote(){
+  const s=document.getElementById('screen');
+  const total=votes.reduce((a,b)=>a+b,0),winner=total>0?votes.indexOf(Math.max(...votes)):-1;
+  let h=`<div class="info-bar">Class votes for the strongest strategy. <strong>Winner gets +3 pts.</strong></div><div class="section-label">Which group had the strongest strategy?</div><div class="vote-grid">`;
+  for(let i=0;i<6;i++)h+=`<button class="vbtn${votes[i]>0?' voted':''}" onclick="castVote(${i})">Group ${i+1}<br><span style="font-size:11px;opacity:.7">${allBrands[i].name.split(' ')[0]}</span></button>`;
+  h+='</div>';
+  if(total>0){
+    h+='<div class="section-label">Live results</div>';
+    for(let j=0;j<8;j++){const pct=Math.round((votes[j]/total)*100);h+=`<div class="vote-result"><div class="vrlabel">Group ${j+1}</div><div class="vrbar"><div class="vrfill" style="width:${pct}%"></div></div><div class="vrnum">${votes[j]}</div></div>`;}
+    h+=`<div style="display:flex;gap:8px;margin-top:.875rem;flex-wrap:wrap">${winner>=0?`<button class="pb" onclick="awardVote(${winner})">Award Group ${winner+1} vote win (+3 pts)</button>`:''}<button class="ob" onclick="resetVotes()">Reset votes</button></div>`;
+  }
+  h+=`<div class="steal-panel"><div class="steal-head">⚡ Challenge steal — successful +2 pts, failed −1 pt</div><div class="steal-body"><select id="steal-from"><option value="">Challenging group...</option>${[0,1,2,3,4,5].map(i=>`<option value="${i}">Group ${i+1}</option>`).join('')}</select><select id="steal-target"><option value="">Target group...</option>${[0,1,2,3,4,5].map(i=>`<option value="${i}">Group ${i+1}</option>`).join('')}</select><button class="gb" onclick="doStealWin()">Steal successful</button><button class="nb" onclick="doStealFail()">Challenge failed (−1)</button></div></div>`;
+  h+=`<div style="margin-top:1rem"><div class="section-label">Best content idea bonus (+2 pts)</div><div class="pts-btns">${[0,1,2,3,4,5].map(i=>`<button class="gb" onclick="addPts(${i},2);alert('Group ${i+1} best content! +2 pts')">G${i+1}</button>`).join('')}</div></div>`;
+  s.innerHTML=h;
+}
+function castVote(i){if(hasVoted)return;votes[i]++;hasVoted=true;renderVote();setTimeout(()=>{hasVoted=false;},600);}
+function awardVote(i){addPts(i,3);alert(`Group ${i+1} wins the vote! +3 pts`);resetVotes();}
+function resetVotes(){votes=[0,0,0,0,0,0];renderVote();}
+function doStealWin(){const f=parseInt(document.getElementById('steal-from').value),t=parseInt(document.getElementById('steal-target').value);if(isNaN(f)||isNaN(t)){alert('Select both groups');return;}addPts(f,2);addPts(t,-1);alert(`Group ${f+1} steals +2 pts! Group ${t+1} −1 pt.`);renderVote();}
+function doStealFail(){const f=parseInt(document.getElementById('steal-from').value);if(isNaN(f)){alert('Select the challenging group');return;}addPts(f,-1);alert(`Challenge failed! Group ${f+1} −1 pt.`);renderVote();}
+function renderBonus(){
+  const s=document.getElementById('screen'),q=bonusQs[bonusIdx];
+  let h=`<div class="bonus-nav"><span class="qcounter">Question ${bonusIdx+1} of ${bonusQs.length} — first correct answer <strong style="color:var(--amber)">+2 pts</strong></span>${bonusIdx>0?`<button class="nb" onclick="bonusIdx--;bonusAnswered=null;renderBonus()">← Prev</button>`:''}${bonusIdx<bonusQs.length-1?`<button class="nb" onclick="bonusIdx++;bonusAnswered=null;renderBonus()">Next →</button>`:''}</div>
+  <div class="bonus-card"><div class="bonus-head"><span>Bonus round</span><span style="font-size:13px;opacity:.85;font-family:DM Sans">First correct answer +2 pts</span></div><div class="bonus-body">
+  <div class="bonus-q">${q.q}</div><div class="bonus-opts">${q.opts.map((o,i)=>{let c='bopt';if(bonusAnswered!==null)c+=i===q.correct?' correct':bonusAnswered===i?' wrong':'';return`<button class="${c}"${bonusAnswered!==null?' disabled':''} onclick="answerBonus(${i})">${o}</button>`;}).join('')}</div>
+  ${bonusAnswered!==null?`<div class="reveal-note">${q.note}</div><div style="margin-top:.875rem"><div class="section-label" style="margin-bottom:7px">Award to first group that answered correctly:</div><div class="pts-btns">${[0,1,2,3,4,5].map(i=>`<button class="gb" onclick="addPts(${i},2);alert('Group ${i+1} bonus +2 pts!')">G${i+1}</button>`).join('')}</div></div>`:''}
+  </div></div>`;
+  s.innerHTML=h;
+}
+function answerBonus(i){bonusAnswered=i;renderBonus();}
+function renderDisc(){
+  const s=document.getElementById('screen');let h='<div class="dlist">';
+  discQs.forEach((q,i)=>{
+    const isO=openQ===i;
+    h+=`<div class="dq${isO?' on':''}"><div class="dqhead" id="dqh${i}"><span class="dqtag" style="background:${q.bg};color:${q.tc}">${q.tag}</span><span class="dqtext">${q.q}</span><span class="dqarrow" style="transform:${isO?'rotate(180deg)':'none'}">⌄</span></div>
+    ${isO?`<div class="dqbody"><div class="bigq"><div class="bqeye">Question for the class</div><div class="bqtext">${q.q}</div></div><div class="notewrap"><span class="notelbl">Your note</span><span class="notetext">${q.note}</span></div><div class="dqact"><span class="disc-note">Best contribution earns +1 pt — award manually using the scoreboard</span></div></div>`:''}
+    </div>`;
+  });
+  h+='</div>';s.innerHTML=h;
+  discQs.forEach((q,i)=>{const el=document.getElementById('dqh'+i);if(el)el.onclick=()=>{openQ=(openQ===i?null:i);renderDisc();};});
+}
+renderBoard();renderScreen();
+</script>
+</body>
+</html>
