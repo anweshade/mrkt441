@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRKT 441 — Strategy Task</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--surface:#ffffff;--surface2:#f0eeea;--border:#e2dfd8;--purple:#5b4fe8;--purple-light:#7c6af7;--purple-bg:#eeecfe;--teal:#0d9e7a;--teal-bg:#e4f7f1;--coral:#e05a3a;--coral-bg:#fdf0ec;--amber:#c47f0a;--amber-bg:#fef6e4;--red:#dc2626;--green:#16a34a;--green-bg:#edfaf3;--text:#1a1a2e;--muted:#6b6b8a;--dim:#c5c3bb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:1.25rem}
+h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--purple);margin-bottom:4px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+.group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem}
+.gcard{border:1.5px solid var(--border);border-radius:10px;padding:.875rem;cursor:pointer;background:var(--surface);text-align:center;transition:all .2s}
+.gcard:hover{border-color:var(--purple);transform:translateY(-1px);box-shadow:0 2px 12px rgba(91,79,232,.1)}
+.gcard.on{border:2px solid var(--purple);background:var(--purple-bg)}
+.gcard.submitted{border-color:var(--teal);background:var(--teal-bg);cursor:default}
+.gnum{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--text)}
+.gname{font-size:11px;color:var(--muted);margin-top:3px}
+.gstat{font-size:10px;margin-top:4px;color:var(--muted)}
+.gstat.ok{color:var(--teal);font-weight:600}
+.canvas{border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-top:1rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+.chead{background:var(--purple);padding:1rem 1.25rem;border-bottom:1.5px solid var(--border)}
+.cgnum{font-size:11px;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.cbname{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff}
+.ctagline{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+.cbrief{padding:1rem 1.25rem;background:var(--surface2);border-bottom:1.5px solid var(--border)}
+.cpara{font-size:13px;line-height:1.75;color:#3a3a55;margin-bottom:10px}
+.ctags{display:flex;flex-wrap:wrap;gap:6px}
+.ctag{font-size:11px;background:var(--surface);color:var(--muted);padding:3px 10px;border-radius:20px;border:1.5px solid var(--border)}
+.cfields{display:grid;grid-template-columns:1fr 1fr}
+.cfield{padding:.875rem 1.1rem;border-right:1.5px solid var(--border);border-bottom:1.5px solid var(--border);background:var(--surface)}
+.cfield:nth-child(even){border-right:none}
+.cflbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.cfield textarea{width:100%;min-height:80px;padding:8px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);resize:none;line-height:1.55;font-family:'DM Sans',sans-serif;transition:border .2s}
+.cfield textarea:focus{outline:none;border-color:var(--purple);background:#fff}
+.cfield textarea:disabled{opacity:.5;cursor:not-allowed}
+.cnav{padding:.875rem 1.25rem;background:var(--surface2);border-top:1.5px solid var(--border);display:flex;justify-content:flex-end;gap:8px;align-items:center}
+button.pb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;background:var(--purple);color:#fff;font-family:'DM Sans',sans-serif;font-weight:600;transition:all .15s}
+button.pb:hover{background:#4a3ed4;box-shadow:0 2px 10px rgba(91,79,232,.3)}
+button.pb:disabled{opacity:.4;cursor:not-allowed}
+button.gb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;transition:all .15s}
+button.gb:hover{background:#15803d;box-shadow:0 2px 10px rgba(22,163,74,.25)}
+button.gb:disabled{opacity:.4;cursor:not-allowed}
+.submit-done{font-size:13px;color:var(--teal);font-weight:700;padding:9px 4px}
+.msg{padding:.875rem 1.1rem;border-radius:10px;font-size:13px;margin-top:.875rem;text-align:center}
+.msg.success{background:var(--teal-bg);border:1.5px solid var(--teal);color:var(--teal)}
+.msg.error{background:#fef2f2;border:1.5px solid var(--red);color:var(--red)}
+.msg.info{background:var(--surface2);border:1.5px solid var(--border);color:var(--muted)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:2.5rem;font-size:14px;color:var(--muted);border:1.5px dashed var(--dim);border-radius:14px;margin-top:1rem;background:var(--surface)}
+@media(max-width:600px){.group-grid{grid-template-columns:repeat(3,1fr)}.cfields{grid-template-columns:1fr}.cfield{border-right:none}}
+</style>
+</head>
+<body>
+<h1>Social Media Strategy Challenge</h1>
+<p class="sub">MRKT 441 · Select your group, fill in the canvas, then submit</p>
+<div class="group-grid" id="gg"></div>
+<div id="canvas-area"><div class="empty-state">Select your group number above to open the canvas</div></div>
+<div id="msg-area"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyA2LlikOQ7V5T-wvNp2aI71vSbYeRy0cfo",
+  authDomain: "social-media-strategy-5ccbb.firebaseapp.com",
+  databaseURL: "https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com",
+  projectId: "social-media-strategy-5ccbb",
+  storageBucket: "social-media-strategy-5ccbb.firebasestorage.app",
+  messagingSenderId: "95774740625",
+  appId: "1:95774740625:web:7ba157a863a75266472f30"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const brands=[
+  {name:'Groundwork Coffee',tagline:'Regional roaster, big ambitions',para:'Groundwork started in a garage in Columbus, Ohio eight years ago. Today they have two cafes and a loyal following built on quality and sustainability. They just secured investment to open eight new locations across the Midwest in 18 months. Problem: outside Columbus, nobody knows them. They must build genuine awareness city by city, before each opening, on a tight budget with no dedicated marketing team.',tags:['Goal: awareness in new cities','Audience: 25–45, urban, values-driven','Budget: limited','No marketing hire yet']},
+  {name:'FitNest',tagline:'Online personal training, no gym required',para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. Grew fast in the pandemic but now faces fierce competition from Peloton and Apple Fitness. Their edge is real personalisation — every plan is built by a human trainer. Audience: busy professionals 28–42. Critical: FitNest has zero physical presence. Social media is not just a channel — it is their entire storefront.',tags:['Goal: grow subscriptions, cut churn','Audience: 28–42, results-focused','Budget: moderate','Trust built entirely online']},
+  {name:'Pawprint Rescue',tagline:'Non-profit shelter, zero ad budget',para:'Small non-profit shelter in Austin, TX. Takes animals other shelters cannot. Runs on volunteers and donations. Goal: double adoptions this year. Catch: zero paid advertising budget. Every result must come from organic content and earned goodwill. Greatest asset: every animal in their care has a story.',tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited capacity']},
+  {name:'CleanSlate Skincare',tagline:'Legacy brand, brand new audience',para:'In pharmacies for 15 years. Trusted by older consumers, invisible to younger ones. Now launching an affordable sustainable line for Gen Z (16–24) — a demographic they have never reached. Built around skin-positive messaging. Core challenge: CleanSlate is seen as a parent\'s brand. Must earn credibility with an audience that distrusts corporate voices completely.',tags:['Goal: credibility with Gen Z (16–24)','Audience: socially conscious, ad-sceptical','Budget: strong','Must not feel corporate']}
+];
+const allBrands=brands.slice(0,3).concat(brands.slice(0,3));
+const fieldDefs=[
+  {key:'f0',label:'Objective',color:'#5b4fe8',ph:'Acquisition, loyalty, or reputation — and why does that fit this brand right now?'},
+  {key:'f1',label:'Platform(s)',color:'#0d9e7a',ph:'Which 1–2 platforms? Justify with audience, budget, and objective.'},
+  {key:'f2',label:'Content idea',color:'#e05a3a',ph:'One specific post or campaign. What type and what value does it give the audience?'},
+  {key:'f3',label:'Measure success',color:'#c47f0a',ph:'Two metrics that actually matter. Why better than just follower count?'}
+];
+let selectedGroup=null,submittedGroups={},localData={};
+onValue(ref(db,'submissions'),(snapshot)=>{submittedGroups=snapshot.val()||{};renderGroups();if(selectedGroup!==null)renderCanvas();});
+function renderGroups(){
+  const gg=document.getElementById('gg');let h='';
+  allBrands.forEach((b,i)=>{
+    const submitted=submittedGroups[i]&&submittedGroups[i].submitted;const act=selectedGroup===i;
+    h+=`<div class="gcard${act?' on':''}${submitted?' submitted':''}" id="gc${i}"><div class="gnum">G${i+1}</div><div class="gname">${b.name.split(' ')[0]}</div><div class="gstat${submitted?' ok':''}">${submitted?'✓ Done':'–'}</div></div>`;
+  });
+  gg.innerHTML=h;
+  allBrands.forEach((b,i)=>{const el=document.getElementById('gc'+i);const sub=submittedGroups[i]&&submittedGroups[i].submitted;if(el&&!sub)el.onclick=()=>{selectedGroup=i;renderCanvas();renderGroups();};});
+}
+function renderCanvas(){
+  if(selectedGroup===null)return;
+  const gi=selectedGroup,b=allBrands[gi];
+  const submitted=submittedGroups[gi]&&submittedGroups[gi].submitted;
+  const existing=(submittedGroups[gi]&&submittedGroups[gi].fields)||localData[gi]||{};
+  const ca=document.getElementById('canvas-area');
+  ca.innerHTML=`<div class="canvas"><div class="chead"><div class="cgnum">Group ${gi+1}</div><div class="cbname">${b.name}</div><div class="ctagline">${b.tagline}</div></div><div class="cbrief"><p class="cpara">${b.para}</p><div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div><div class="cfields">${fieldDefs.map(f=>`<div class="cfield"><div class="cflbl" style="color:${f.color}">${f.label}</div><textarea id="ta_${f.key}" placeholder="${f.ph}"${submitted?' disabled':''}>${existing[f.key]||''}</textarea></div>`).join('')}</div><div class="cnav">${submitted?'<span class="submit-done">✓ Submitted — your answers are on the projector</span>':`<button class="pb" id="save-btn">Save draft</button><button class="gb" id="submit-btn">Submit to projector →</button>`}</div></div>`;
+  if(!submitted){
+    fieldDefs.forEach(f=>{const ta=document.getElementById('ta_'+f.key);if(ta)ta.oninput=()=>{if(!localData[gi])localData[gi]={};localData[gi][f.key]=ta.value;};});
+    document.getElementById('save-btn').onclick=()=>{if(!localData[gi])localData[gi]={};fieldDefs.forEach(f=>{localData[gi][f.key]=document.getElementById('ta_'+f.key)?.value||'';});showMsg('Draft saved locally','info');};
+    document.getElementById('submit-btn').onclick=async()=>{
+      const fields={};fieldDefs.forEach(f=>{fields[f.key]=document.getElementById('ta_'+f.key)?.value?.trim()||'';});
+      const filled=Object.values(fields).filter(v=>v).length;
+      if(filled<2){showMsg('Fill in at least 2 sections before submitting','error');return;}
+      const btn=document.getElementById('submit-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Submitting...';
+      try{await set(ref(db,`submissions/${gi}`),{submitted:true,fields,timestamp:Date.now(),groupNum:gi+1,brandName:b.name});showMsg(`Group ${gi+1} submitted! Watch the projector.`,'success');renderCanvas();}
+      catch(e){btn.disabled=false;btn.innerHTML='Submit to projector →';showMsg('Connection error — try again','error');}
+    };
+  }
+}
+function showMsg(text,type){document.getElementById('msg-area').innerHTML=`<div class="msg ${type}">${text}</div>`;setTimeout(()=>{document.getElementById('msg-area').innerHTML='';},4000);}
+renderGroups();
+</script>
+</body>
+</html>
