@@ -10,14 +10,20 @@
 body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;padding:1rem;min-height:100vh}
 h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#5b4fe8;margin-bottom:4px}
 .sub{font-size:13px;color:#6b6b8a;margin-bottom:1.25rem}
-.locked-banner{background:#fef6e4;border:2px solid #c47f0a;border-radius:12px;padding:1.25rem;text-align:center;font-size:16px;font-weight:700;color:#c47f0a;margin-bottom:1rem}
+.banner{border-radius:12px;padding:1.25rem;text-align:center;font-size:16px;font-weight:700;margin-bottom:1rem}
+.banner.locked{background:#fef6e4;border:2px solid #c47f0a;color:#c47f0a}
+.banner.pitch{background:#eeecfe;border:2px solid #5b4fe8;color:#5b4fe8;font-size:18px;padding:2rem}
+.banner.vote{background:#e4f7f1;border:2px solid #0d9e7a;color:#0d9e7a}
+.timer-display{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;text-align:center;margin:.75rem 0;color:#1a1a2e}
+.timer-display.warn{color:#dc2626;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
 .gcard{border:2px solid #e2dfd8;border-radius:10px;padding:.875rem;background:#fff;text-align:center;transition:border .15s}
 .gcard.available{cursor:pointer}
 .gcard.available:hover{border-color:#5b4fe8;transform:translateY(-1px)}
 .gcard.mine{border-color:#5b4fe8;background:#eeecfe}
-.gcard.taken{opacity:.4;background:#f9f9f9}
-.gcard.submitted{border-color:#0d9e7a;background:#e4f7f1}
+.gcard.taken{opacity:.4;background:#f9f9f9;pointer-events:none}
+.gcard.done{border-color:#0d9e7a;background:#e4f7f1}
 .gcard.locked{opacity:.3;pointer-events:none}
 .gnum{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#1a1a2e}
 .gname{font-size:11px;color:#6b6b8a;margin-top:2px;line-height:1.4}
@@ -49,14 +55,34 @@ button.gb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:p
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid #e2dfd8;border-top-color:#5b4fe8;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:2rem;font-size:14px;color:#6b6b8a;border:2px dashed #e2dfd8;border-radius:12px;margin-top:1rem;background:#fff}
+/* PITCH */
+.pitch-box{border:2px solid #5b4fe8;border-radius:12px;overflow:hidden;margin-top:1rem}
+.pitch-head{background:#5b4fe8;padding:.875rem 1.1rem}
+.pitch-head-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff}
+.pitch-head-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+.pitch-body{padding:1rem 1.1rem;background:#fff}
+.pitch-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;color:#5b4fe8;font-family:'Syne',sans-serif}
+.pitch-body textarea{width:100%;min-height:100px;padding:10px;font-size:14px;border:2px solid #5b4fe8;border-radius:8px;background:#f5f4f0;color:#1a1a2e;resize:none;font-family:'DM Sans',sans-serif;line-height:1.6}
+.pitch-body textarea:focus{outline:none;background:#fff}
+/* VOTE */
+.vote-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1rem}
+.vcard{border:2px solid #e2dfd8;border-radius:12px;padding:1rem;cursor:pointer;background:#fff;text-align:center;transition:all .2s}
+.vcard:hover{border-color:#5b4fe8;transform:translateY(-1px)}
+.vcard.selected{border-color:#5b4fe8;background:#eeecfe}
+.vcard.mine{opacity:.4;pointer-events:none}
+.vcard.done{pointer-events:none}
+.vgnum{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#1a1a2e}
+.vgname{font-size:12px;color:#6b6b8a;margin-top:3px;line-height:1.4}
+.vgstat{font-size:11px;margin-top:5px;font-weight:600;color:#6b6b8a}
+.vgstat.voted{color:#0d9e7a}
 </style>
 </head>
 <body>
 <h1>Social Media Strategy</h1>
-<p class="sub">MRKT 441 · Select your group, fill in all four sections, then submit</p>
-<div id="locked-banner" class="locked-banner">⏳ Waiting for your instructor to start the round...</div>
-<div class="group-grid" id="gg"></div>
-<div id="canvas-area"></div>
+<p class="sub">MRKT 441</p>
+<div id="banner"></div>
+<div id="gg" class="group-grid"></div>
+<div id="main-area"></div>
 <div id="msg"></div>
 
 <script>
@@ -76,7 +102,7 @@ const brands = [
    para:'ThreadLab has a cult eco-conscious following but wants to reach mainstream fashion shoppers who care more about style than sustainability. Never run paid campaigns. Risk: going too mainstream could alienate their loyal base.',
    tags:['Goal: reach mainstream audience','Audience: 18-35, style-conscious','Budget: moderate — first paid campaign','Risk: losing existing community']},
   {name:'Stackr', tagline:'Finance app for first-time earners',
-   para:'Stackr is a free budgeting app for 18-25 year olds. It has 50,000 downloads but very low daily active usage — people download it then barely open it again. The challenge is not awareness — it is habit formation and re-engagement. Most competitors feel boring and corporate. Stackr wants to feel like a friend, not a bank.',
+   para:'Stackr is a free budgeting app for 18-25 year olds. It has 50,000 downloads but very low daily active usage — people download it then barely open it. The challenge is not awareness — it is habit formation and re-engagement. Most competitors feel boring and corporate. Stackr wants to feel like a friend, not a bank.',
    tags:['Goal: increase daily active users','Audience: 18-25, first-time earners','Budget: small — startup stage','Challenge: re-engagement not awareness']},
   {name:'The Reel Room', tagline:'Independent cinema fighting for survival',
    para:'The Reel Room is a beloved independent Nashville cinema. Since a large multiplex opened nearby, ticket sales dropped 35%. They are leaning into cult classics, director Q&As, themed nights, and a craft cocktail bar. Near-zero marketing budget.',
@@ -85,18 +111,22 @@ const brands = [
 
 const fields = [
   {key:'f0', label:'Objective', color:'#5b4fe8', ph:'What is the primary goal — acquisition, loyalty, or reputation? Why does that fit this brand right now?'},
-  {key:'f1', label:'Platform(s)', color:'#0d9e7a', ph:'Which 1-2 platforms? Justify with the brand\'s audience, budget, and objective.'},
-  {key:'f2', label:'Content idea', color:'#e05a3a', ph:'One specific post or campaign idea. What type of content — and what value does it give the audience?'},
-  {key:'f3', label:'Measure success', color:'#c47f0a', ph:'Two metrics that actually matter for this brand\'s goal. Why not just follower count?'}
+  {key:'f1', label:'Platform(s)', color:'#0d9e7a', ph:'Which 1-2 platforms? Justify with audience, budget, and objective.'},
+  {key:'f2', label:'Content idea', color:'#e05a3a', ph:'One specific post or campaign idea. What type — and what value does it give the audience?'},
+  {key:'f3', label:'Measure success', color:'#c47f0a', ph:'Two metrics that actually matter. Why not just follower count?'}
 ];
 
+// PHASES: waiting | round | pitching | voting | done
+let phase = 'waiting';
+let pitchingGroup = -1;
 let myGroup = null;
-let roundActive = false;
 let submissions = {};
 let local = {};
-let polling = null;
+let myVote = null;
+let voteSubmitted = false;
+let timerSec = 0;
+let timerInt = null;
 
-// Use JSONP to avoid CORS issues completely
 function dbGet(path) {
   return new Promise((resolve) => {
     const cb = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
@@ -111,41 +141,76 @@ function dbGet(path) {
 
 async function dbPut(path, data) {
   try {
-    const r = await fetch(DB + '/' + path + '.json', {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(data)
-    });
+    const r = await fetch(DB + '/' + path + '.json', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
     return r.ok;
   } catch(e) { return false; }
 }
 
 async function fetchState() {
-  const [subs, round] = await Promise.all([
-    dbGet('submissions'),
-    dbGet('roundActive')
-  ]);
-  const wasActive = roundActive;
+  const [subs, st] = await Promise.all([dbGet('submissions'), dbGet('state')]);
   submissions = subs || {};
-  roundActive = round === true;
-  render();
-  // flash when round just started
-  if (!wasActive && roundActive) {
-    document.getElementById('gg').style.animation = 'none';
-    setTimeout(() => { document.getElementById('gg').style.animation = ''; }, 10);
+  if (st) {
+    const prevPhase = phase;
+    phase = st.phase || 'waiting';
+    pitchingGroup = st.pitchingGroup !== undefined ? st.pitchingGroup : -1;
+    timerSec = st.timerSec || 0;
+
+    // reset vote if phase changed away from voting
+    if (prevPhase === 'voting' && phase !== 'voting') { voteSubmitted = false; myVote = null; }
   }
+  render();
 }
 
 function render() {
-  const banner = document.getElementById('locked-banner');
-  banner.style.display = roundActive ? 'none' : 'block';
-  renderGroups();
-  if (myGroup !== null) {
-    renderCanvas();
-  } else if (roundActive) {
-    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="border-color:#5b4fe8;color:#5b4fe8;font-weight:600">&#128204; Select your group number above to get started</div>';
-  } else {
-    document.getElementById('canvas-area').innerHTML = '';
+  const banner = document.getElementById('banner');
+  const gg = document.getElementById('gg');
+  const main = document.getElementById('main-area');
+
+  if (phase === 'waiting') {
+    gg.style.display = 'none';
+    banner.innerHTML = '<div class="banner locked">⏳ Waiting for your instructor to start the round...</div>';
+    main.innerHTML = '';
+
+  } else if (phase === 'round') {
+    gg.style.display = 'grid';
+    const mins = Math.floor(timerSec/60), secs = timerSec%60;
+    const timeStr = mins + ':' + (secs<10?'0':'') + secs;
+    const warn = timerSec <= 60;
+    banner.innerHTML = `<div class="banner locked" style="background:#e4f7f1;border-color:#0d9e7a;color:#0d9e7a;padding:.75rem">
+      Round is live — <span style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;${warn?'color:#dc2626':''}">${timeStr}</span> remaining
+    </div>`;
+    renderGroups();
+    if (myGroup !== null) renderCanvas();
+    else main.innerHTML = '<div class="empty" style="border-color:#5b4fe8;color:#5b4fe8;font-weight:600">📌 Select your group above to get started</div>';
+
+  } else if (phase === 'pitching') {
+    gg.style.display = 'none';
+    const presenting = brands[pitchingGroup];
+    const isMyTurn = myGroup === pitchingGroup;
+    if (isMyTurn) {
+      banner.innerHTML = `<div class="banner pitch">🎤 It's your turn to pitch!<br><span style="font-size:13px;font-weight:400;margin-top:4px;display:block">Type your pitch below — it will appear on the projector as you type</span></div>`;
+      renderPitchInput();
+    } else {
+      banner.innerHTML = `<div class="banner" style="background:#f0eeea;border:2px solid #e2dfd8;color:#1a1a2e;border-radius:12px;padding:1.25rem;text-align:center;font-size:15px;font-weight:600;margin-bottom:1rem">
+        🎙 Group ${pitchingGroup+1} — <strong>${presenting ? presenting.name : ''}</strong> is presenting
+      </div>`;
+      main.innerHTML = '<div class="empty">Listen and prepare your questions — your turn to vote is coming!</div>';
+    }
+
+  } else if (phase === 'voting') {
+    gg.style.display = 'none';
+    const mins = Math.floor(timerSec/60), secs = timerSec%60;
+    const timeStr = mins + ':' + (secs<10?'0':'') + secs;
+    const warn = timerSec <= 30;
+    banner.innerHTML = `<div class="banner vote">
+      🗳 Vote now — <span style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;${warn?'color:#dc2626':''}">${timeStr}</span> remaining
+    </div>`;
+    renderVoteScreen();
+
+  } else if (phase === 'done') {
+    gg.style.display = 'none';
+    banner.innerHTML = '<div class="banner" style="background:#eeecfe;border:2px solid #5b4fe8;color:#5b4fe8;border-radius:12px;padding:1.5rem;text-align:center;font-size:16px;font-weight:700;margin-bottom:1rem">✅ Round complete — watch the projector for results!</div>';
+    main.innerHTML = '';
   }
 }
 
@@ -157,96 +222,54 @@ function renderGroups() {
     const claimed = submissions[i] && submissions[i].claimed;
     const ismine = myGroup === i;
     const taken = !ismine && claimed;
-    const locked = !roundActive;
     const alreadyPicked = myGroup !== null && !ismine;
-
-    let cls = 'gcard';
-    let stat = '';
-    let statCls = '';
-
-    if (locked) { cls += ' locked'; stat = 'Locked'; }
-    else if (sub && ismine) { cls += ' submitted'; stat = '&#10003; Submitted'; statCls = 'ok'; }
-    else if (sub && !ismine) { cls += ' taken locked'; stat = 'Submitted'; statCls = 'red'; }
+    let cls = 'gcard', stat = '', statCls = '';
+    if (sub && ismine) { cls += ' done'; stat = '✓ Submitted'; statCls = 'ok'; }
+    else if (sub) { cls += ' taken'; stat = 'Submitted'; statCls = 'red'; }
     else if (ismine) { cls += ' mine'; stat = 'Your group'; statCls = 'mine'; }
-    else if (taken) { cls += ' taken locked'; stat = 'Taken'; statCls = 'red'; }
-    else if (alreadyPicked) { cls += ' locked'; stat = ''; }
+    else if (taken || alreadyPicked) { cls += ' taken'; stat = taken ? 'Taken' : ''; statCls = 'red'; }
     else { cls += ' available'; stat = 'Tap to select'; statCls = 'mine'; }
-
-    h += `<div class="${cls}" id="gc${i}">
-      <div class="gnum">${i+1}</div>
-      <div class="gname">${b.name}</div>
-      <div class="gstat ${statCls}">${stat}</div>
-    </div>`;
+    h += `<div class="${cls}" id="gc${i}"><div class="gnum">${i+1}</div><div class="gname">${b.name}</div><div class="gstat ${statCls}">${stat}</div></div>`;
   });
   gg.innerHTML = h;
-
-  // attach click only to genuinely available cards
   brands.forEach((b, i) => {
     const claimed = submissions[i] && submissions[i].claimed;
-    const canClick = roundActive && !claimed && myGroup === null;
-    if (!canClick) return;
-    const el = document.getElementById('gc' + i);
-    if (el) el.onclick = () => claimGroup(i);
+    if (!claimed && myGroup === null) {
+      const el = document.getElementById('gc' + i);
+      if (el) el.onclick = () => claimGroup(i);
+    }
   });
 }
 
 async function claimGroup(i) {
-  // re-check Firebase before claiming
   const current = await dbGet('submissions/' + i);
-  if (current && current.claimed) {
-    showMsg('That group was just taken — pick another!', 'error');
-    fetchState();
-    return;
-  }
-  const ok = await dbPut('submissions/' + i, { claimed: true, submitted: false, groupNum: i+1, brandName: brands[i].name });
-  if (ok) {
-    myGroup = i;
-    render();
-  } else {
-    showMsg('Connection error — try again', 'error');
-  }
+  if (current && current.claimed) { showMsg('That group was just taken — pick another!', 'error'); fetchState(); return; }
+  const ok = await dbPut('submissions/' + i, {claimed:true, submitted:false, groupNum:i+1, brandName:brands[i].name});
+  if (ok) { myGroup = i; render(); } else { showMsg('Connection error — try again', 'error'); }
 }
 
 function renderCanvas() {
-  if (myGroup === null) return;
   const gi = myGroup;
   const b = brands[gi];
   const done = submissions[gi] && submissions[gi].submitted;
   const existing = (submissions[gi] && submissions[gi].fields) || local[gi] || {};
-  document.getElementById('canvas-area').innerHTML = `
+  const main = document.getElementById('main-area');
+  main.innerHTML = `
     <div class="canvas">
-      <div class="chead">
-        <div class="cgnum">Group ${gi+1} — Your brand</div>
-        <div class="cbname">${b.name}</div>
-      </div>
-      <div class="cbrief">
-        <p class="cpara">${b.para}</p>
-        <div class="ctags">${b.tags.map(t => `<span class="ctag">${t}</span>`).join('')}</div>
-      </div>
-      <div class="cfields">
-        ${fields.map(f => `
-          <div class="cfield">
-            <div class="cflbl" style="color:${f.color}">${f.label}</div>
-            <textarea id="ta_${f.key}" placeholder="${f.ph}" ${done ? 'disabled' : ''}>${existing[f.key] || ''}</textarea>
-          </div>`).join('')}
-      </div>
-      <div class="cnav">
-        ${done
-          ? '<span style="font-size:13px;color:#0d9e7a;font-weight:700">&#10003; Submitted — check the projector!</span>'
-          : `<button class="pb" id="save-btn">Save draft</button>
-             <button class="gb" id="submit-btn">Submit &#8594;</button>`}
+      <div class="chead"><div class="cgnum">Group ${gi+1} — Your brand</div><div class="cbname">${b.name}</div></div>
+      <div class="cbrief"><p class="cpara">${b.para}</p><div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div>
+      <div class="cfields">${fields.map(f=>`<div class="cfield"><div class="cflbl" style="color:${f.color}">${f.label}</div><textarea id="ta_${f.key}" placeholder="${f.ph}" ${done?'disabled':''}>${existing[f.key]||''}</textarea></div>`).join('')}</div>
+      <div class="cnav">${done
+        ? '<span style="font-size:13px;color:#0d9e7a;font-weight:700">✓ Submitted — get ready to pitch!</span>'
+        : `<button class="pb" id="save-btn">Save draft</button><button class="gb" id="submit-btn">Submit →</button>`}
       </div>
     </div>`;
-
   if (!done) {
-    fields.forEach(f => {
-      const ta = document.getElementById('ta_' + f.key);
-      if (ta) ta.oninput = () => { if (!local[gi]) local[gi] = {}; local[gi][f.key] = ta.value; };
-    });
+    fields.forEach(f => { const ta=document.getElementById('ta_'+f.key); if(ta) ta.oninput=()=>{if(!local[gi])local[gi]={};local[gi][f.key]=ta.value;}; });
     document.getElementById('save-btn').onclick = () => {
-      if (!local[gi]) local[gi] = {};
-      fields.forEach(f => { local[gi][f.key] = document.getElementById('ta_' + f.key)?.value || ''; });
-      showMsg('Draft saved!', 'success');
+      if(!local[gi])local[gi]={};
+      fields.forEach(f=>{local[gi][f.key]=document.getElementById('ta_'+f.key)?.value||'';});
+      showMsg('Draft saved!','success');
     };
     document.getElementById('submit-btn').onclick = () => submitGroup(gi);
   }
@@ -254,28 +277,99 @@ function renderCanvas() {
 
 async function submitGroup(gi) {
   const f = {};
-  fields.forEach(field => { f[field.key] = document.getElementById('ta_' + field.key)?.value?.trim() || ''; });
-  if (Object.values(f).filter(v => v).length < 2) { showMsg('Fill in at least 2 sections first', 'error'); return; }
+  fields.forEach(field => { f[field.key] = document.getElementById('ta_'+field.key)?.value?.trim()||''; });
+  if (Object.values(f).filter(v=>v).length < 2) { showMsg('Fill in at least 2 sections first','error'); return; }
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Submitting...';
-  const ok = await dbPut('submissions/' + gi, {
-    claimed: true, submitted: true, fields: f,
-    groupNum: gi+1, brandName: brands[gi].name, timestamp: Date.now()
-  });
-  if (ok) {
-    showMsg('Submitted! Your answers are now on the projector.', 'success');
-    fetchState();
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = 'Submit &#8594;';
-    showMsg('Connection error — check WiFi and try again', 'error');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting...';
+  const ok = await dbPut('submissions/'+gi, {claimed:true,submitted:true,fields:f,groupNum:gi+1,brandName:brands[gi].name,timestamp:Date.now()});
+  if (ok) { showMsg('Submitted! Get ready to pitch.','success'); fetchState(); }
+  else { btn.disabled=false; btn.innerHTML='Submit →'; showMsg('Connection error — try again','error'); }
+}
+
+function renderPitchInput() {
+  const main = document.getElementById('main-area');
+  const gi = myGroup;
+  const b = brands[gi];
+  const existing = submissions[gi]?.pitch || '';
+  main.innerHTML = `
+    <div class="pitch-box">
+      <div class="pitch-head">
+        <div class="pitch-head-title">${b.name} — Your pitch</div>
+        <div class="pitch-head-sub">Type here — your words appear live on the projector</div>
+      </div>
+      <div class="pitch-body">
+        <div class="pitch-label">Your pitch</div>
+        <textarea id="pitch-ta" placeholder="Summarise your strategy in 2-3 sentences. What platform, what content, and why it works for this brand...">${existing}</textarea>
+        <div style="margin-top:10px;text-align:right">
+          <button class="pb" id="pitch-save-btn">Send to projector →</button>
+        </div>
+      </div>
+    </div>`;
+  const ta = document.getElementById('pitch-ta');
+  // auto-save pitch as they type
+  let saveTimeout;
+  ta.oninput = () => {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => savePitch(ta.value), 800);
+  };
+  document.getElementById('pitch-save-btn').onclick = () => savePitch(ta.value, true);
+}
+
+async function savePitch(text, manual) {
+  const gi = myGroup;
+  const current = submissions[gi] || {};
+  current.pitch = text;
+  await dbPut('submissions/'+gi, {...current, pitch:text});
+  if (manual) showMsg('Pitch sent to projector!','success');
+}
+
+function renderVoteScreen() {
+  const main = document.getElementById('main-area');
+  let h = '';
+  if (voteSubmitted) {
+    h = '<div class="msg success" style="margin-bottom:1rem">✓ Your vote has been submitted!</div>';
   }
+  h += '<div class="vote-grid">';
+  brands.forEach((b, i) => {
+    const ismine = myGroup === i;
+    const isSelected = myVote === i;
+    let cls = 'vcard', stat = 'Tap to vote', statCls = '';
+    if (ismine) { cls += ' mine'; stat = 'Your group'; }
+    else if (voteSubmitted && isSelected) { cls += ' done'; stat = '✓ Your vote'; statCls = 'voted'; }
+    else if (voteSubmitted) { cls += ' done'; stat = ''; }
+    else if (isSelected) { cls += ' selected'; stat = '✓ Selected'; statCls = 'voted'; }
+    h += `<div class="${cls}" id="vc${i}"><div class="vgnum">${i+1}</div><div class="vgname">${b.name}</div><div class="vgstat ${statCls}">${stat}</div></div>`;
+  });
+  h += '</div>';
+  if (!voteSubmitted) {
+    h += `<button class="gb" id="vote-submit-btn" style="width:100%;padding:12px;font-size:14px;${myVote===null?'opacity:.4;cursor:not-allowed':''}">Submit vote</button>`;
+  }
+  main.innerHTML = h;
+  if (!voteSubmitted) {
+    brands.forEach((b,i) => {
+      if (i === myGroup) return;
+      const el = document.getElementById('vc'+i);
+      if (el) el.onclick = () => { myVote=i; renderVoteScreen(); };
+    });
+    const btn = document.getElementById('vote-submit-btn');
+    if (btn && myVote !== null) btn.onclick = () => submitVote();
+  }
+}
+
+async function submitVote() {
+  if (myVote === null) return;
+  const btn = document.getElementById('vote-submit-btn');
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting...'; }
+  const current = await dbGet('votes') || {};
+  current[myVote] = (current[myVote]||0)+1;
+  const ok = await dbPut('votes', current);
+  if (ok) { voteSubmitted=true; renderVoteScreen(); }
+  else { showMsg('Connection error — try again','error'); if(btn){btn.disabled=false;btn.innerHTML='Submit vote';} }
 }
 
 function showMsg(text, type) {
   document.getElementById('msg').innerHTML = `<div class="msg ${type}">${text}</div>`;
-  setTimeout(() => { document.getElementById('msg').innerHTML = ''; }, 4000);
+  setTimeout(() => { document.getElementById('msg').innerHTML=''; }, 4000);
 }
 
 fetchState();

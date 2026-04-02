@@ -8,26 +8,27 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;min-height:100vh}
-
-/* TOP BAR */
-.topbar{display:flex;align-items:center;gap:12px;padding:.875rem 1.5rem;background:#fff;border-bottom:2px solid #e2dfd8;flex-wrap:wrap}
-.title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#5b4fe8;margin-right:auto}
+.topbar{display:flex;align-items:center;gap:10px;padding:.75rem 1.5rem;background:#fff;border-bottom:2px solid #e2dfd8;flex-wrap:wrap}
+.title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#5b4fe8;margin-right:auto}
 .tabs{display:flex;gap:4px;background:#f5f4f0;border-radius:10px;padding:4px;border:1.5px solid #e2dfd8}
-.tab{padding:7px 16px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer;border:none;background:none;color:#6b6b8a;font-family:'DM Sans',sans-serif;transition:all .2s}
+.tab{padding:7px 14px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer;border:none;background:none;color:#6b6b8a;font-family:'DM Sans',sans-serif;transition:all .2s}
 .tab.on{background:#5b4fe8;color:#fff}
 .tab:hover:not(.on){color:#1a1a2e;background:#e2dfd8}
-.start-btn{font-size:13px;padding:8px 20px;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;transition:all .2s}
-.start-btn.inactive{background:#16a34a;color:#fff}
-.start-btn.active{background:#dc2626;color:#fff}
-.timer{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;cursor:pointer;padding:6px 16px;border-radius:8px;background:#f5f4f0;border:2px solid #e2dfd8;color:#1a1a2e;min-width:80px;text-align:center;user-select:none}
-.timer.run{color:#0d9e7a;border-color:#0d9e7a;background:#e4f7f1}
-.timer.warn{color:#c47f0a;border-color:#c47f0a;background:#fef6e4;animation:pulse 1s infinite}
-.timer.done{color:#dc2626;border-color:#dc2626;background:#fef2f2}
+.phase-btn{font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;white-space:nowrap}
+.phase-btn.green{background:#16a34a;color:#fff}
+.phase-btn.red{background:#dc2626;color:#fff}
+.phase-btn.amber{background:#c47f0a;color:#fff}
+.phase-btn.purple{background:#5b4fe8;color:#fff}
+.phase-btn.gray{background:#6b6b8a;color:#fff}
+.timer-display{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;padding:6px 16px;border-radius:8px;background:#f0eeea;border:2px solid #e2dfd8;color:#1a1a2e;min-width:80px;text-align:center}
+.timer-display.run{color:#0d9e7a;border-color:#0d9e7a;background:#e4f7f1}
+.timer-display.warn{color:#dc2626;border-color:#dc2626;background:#fef2f2;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 .live{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;color:#dc2626}
 .live.on{color:#0d9e7a}
-.dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
-.live.on .dot{animation:none}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.phase-bar{padding:.625rem 1.5rem;background:#eeecfe;border-bottom:2px solid #e2dfd8;font-size:13px;color:#5b4fe8;font-weight:600;display:flex;align-items:center;gap:10px}
+.phase-label{font-family:'Syne',sans-serif;font-size:14px;font-weight:800}
 
 /* SCOREBOARD */
 .sboard{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:10px 1.5rem;background:#fff;border-bottom:2px solid #e2dfd8}
@@ -52,15 +53,14 @@ body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;min-heigh
 .bcard:hover{border-color:#5b4fe8;transform:translateY(-1px)}
 .bcard.on{border:2px solid #5b4fe8;background:#eeecfe}
 .bcard.got{border-color:#0d9e7a;background:#e4f7f1}
+.bcard.pitching{border-color:#5b4fe8;background:#eeecfe;border-width:3px}
 .bnum{font-size:10px;font-weight:700;color:#6b6b8a;text-transform:uppercase;margin-bottom:3px}
 .bname{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#1a1a2e}
 .bstat{font-size:11px;margin-top:3px;color:#6b6b8a}
 .bstat.ok{color:#0d9e7a;font-weight:700}
-.bstat.claimed{color:#5b4fe8;font-weight:600}
-
-/* CANVAS */
+.bstat.pitching{color:#5b4fe8;font-weight:700}
 .canvas{border:2px solid #e2dfd8;border-radius:12px;overflow:hidden;background:#fff}
-.chead{background:#5b4fe8;padding:1rem 1.25rem}
+.chead{background:#5b4fe8;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
 .cgnum{font-size:11px;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .cbname{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff}
 .ctagline{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
@@ -72,8 +72,10 @@ body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;min-heigh
 .cfield{padding:.875rem 1.1rem;border-right:1.5px solid #e2dfd8;border-bottom:1.5px solid #e2dfd8;background:#fff}
 .cfield:nth-child(even){border-right:none}
 .cflbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
-.cval{font-size:14px;line-height:1.65;color:#1a1a2e;min-height:48px;white-space:pre-wrap}
+.cval{font-size:14px;line-height:1.65;color:#1a1a2e;min-height:40px;white-space:pre-wrap}
 .cempty{font-size:13px;color:#c5c3bb;font-style:italic}
+.pitch-display{padding:1.25rem;background:#eeecfe;border-top:2px solid #5b4fe8;font-size:16px;line-height:1.7;color:#1a1a2e;min-height:80px;font-style:italic}
+.pitch-label{font-size:11px;font-weight:700;color:#5b4fe8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:'Syne',sans-serif}
 .cnav{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1.25rem;background:#f0eeea;border-top:2px solid #e2dfd8;flex-wrap:wrap;gap:8px}
 .cnav-r{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 button.nb{font-size:12px;padding:7px 12px;border:1.5px solid #e2dfd8;border-radius:7px;cursor:pointer;background:#fff;color:#6b6b8a;font-family:'DM Sans',sans-serif;font-weight:500}
@@ -82,8 +84,6 @@ button.pb{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:p
 button.gb{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;background:#16a34a;color:#fff;font-family:'DM Sans',sans-serif;font-weight:700}
 button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:pointer;background:#e05a3a;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600}
 .empty{text-align:center;padding:2.5rem;font-size:14px;color:#6b6b8a;border:2px dashed #e2dfd8;border-radius:12px;background:#fff}
-
-/* VOTE */
 .info-bar{background:#fff;border:1.5px solid #e2dfd8;border-radius:10px;padding:.875rem 1.1rem;font-size:13px;color:#6b6b8a;margin-bottom:1rem}
 .info-bar strong{color:#1a1a2e}
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem}
@@ -91,7 +91,7 @@ button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:p
 .vbtn:hover{border-color:#5b4fe8;transform:translateY(-1px)}
 .vbtn.voted{border-color:#5b4fe8;background:#eeecfe;color:#5b4fe8}
 .vrow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
-.vlbl{font-size:13px;font-weight:600;min-width:72px}
+.vlbl{font-size:13px;font-weight:600;min-width:80px}
 .vbar{flex:1;height:10px;background:#f0eeea;border-radius:5px;overflow:hidden;border:1px solid #e2dfd8}
 .vfill{height:100%;background:#5b4fe8;border-radius:5px;transition:width .4s}
 .vnum{font-size:12px;color:#6b6b8a;min-width:20px;text-align:right}
@@ -100,8 +100,6 @@ button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:p
 .steal-body{padding:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff}
 .steal-body select{padding:7px 10px;font-size:13px;border:1.5px solid #e2dfd8;border-radius:7px;background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif}
 .pts-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-
-/* BONUS */
 .bcard2{border:2px solid #fca5a5;border-radius:14px;overflow:hidden;margin-bottom:1rem}
 .bhead{background:#dc2626;color:#fff;padding:.875rem 1.25rem;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;display:flex;justify-content:space-between;align-items:center}
 .bbody{padding:1.25rem;background:#fff}
@@ -115,11 +113,8 @@ button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:p
 .bnote{font-size:13px;color:#6b6b8a;line-height:1.7;padding:1rem;background:#f5f4f0;border-radius:8px;border-left:3px solid #5b4fe8}
 .bnav{display:flex;gap:8px;margin-bottom:1rem;align-items:center}
 .qcount{font-size:13px;color:#6b6b8a;margin-right:auto}
-
-/* RESET BAR */
 .resetbar{padding:.75rem 1.5rem;border-top:2px solid #e2dfd8;background:#fff;display:flex;justify-content:flex-end}
 button.resetbtn{font-size:12px;padding:6px 14px;border:2px solid #fca5a5;border-radius:7px;cursor:pointer;background:#fff;color:#dc2626;font-family:'DM Sans',sans-serif;font-weight:600}
-button.resetbtn:hover{background:#fef2f2}
 </style>
 </head>
 <body>
@@ -127,13 +122,18 @@ button.resetbtn:hover{background:#fef2f2}
 <div class="topbar">
   <div class="title">Social Media Strategy Game</div>
   <div class="tabs">
-    <button class="tab on" onclick="setTab('task')">Strategy</button>
+    <button class="tab on" onclick="setTab('strategy')">Strategy</button>
     <button class="tab" onclick="setTab('vote')">Vote</button>
     <button class="tab" onclick="setTab('bonus')">Bonus</button>
   </div>
-  <button id="start-btn" class="start-btn inactive" onclick="toggleRound()">Start round</button>
-  <div class="timer" id="timer" onclick="toggleTimer()">10:00</div>
-  <span id="live-label" class="live"><span class="dot"></span>Connecting</span>
+  <div id="phase-controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"></div>
+  <div class="timer-display" id="timer">10:00</div>
+  <span id="live-label" class="live"><span class="dot"></span> Connecting</span>
+</div>
+
+<div class="phase-bar" id="phase-bar">
+  <span class="phase-label" id="phase-label">Setup</span>
+  <span id="phase-sub" style="font-weight:400;color:#6b6b8a"></span>
 </div>
 
 <div class="sboard" id="sboard"></div>
@@ -142,6 +142,60 @@ button.resetbtn:hover{background:#fef2f2}
 
 <script>
 const DB = 'https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com';
+
+const brands = [
+  {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
+   para:'Groundwork started in a garage in Columbus eight years ago. Today: two cafes, loyal following. Secured investment to open eight new Midwest locations. Problem: nobody outside Columbus knows them.',
+   tags:['Goal: awareness in new cities','Audience: 25-45, urban, values-driven','Budget: limited','No marketing team']},
+  {name:'FitNest', tagline:'Online personal training, no gym required',
+   para:'FitNest pairs users with certified trainers via live video. Faces fierce competition. Zero physical presence — social media IS their entire storefront.',
+   tags:['Goal: grow subscriptions','Audience: 28-42, results-focused','Budget: moderate','Trust must be built online']},
+  {name:'Pawprint Rescue', tagline:'Non-profit shelter, zero ad budget',
+   para:'Small non-profit shelter in Austin, TX. Relies on volunteers and donations. Goal: double adoptions. Zero paid ad budget. Every result from organic content and earned goodwill.',
+   tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']},
+  {name:'ThreadLab', tagline:'Sustainable fashion going mainstream',
+   para:'Cult eco-conscious following but wants to reach mainstream fashion shoppers. Never run paid campaigns. Risk: going too mainstream could alienate their loyal base.',
+   tags:['Goal: reach mainstream audience','Audience: 18-35, style-conscious','Budget: moderate — first paid campaign','Risk: losing existing community']},
+  {name:'Stackr', tagline:'Finance app for first-time earners',
+   para:'Free budgeting app, 50k downloads but very low daily active usage. Challenge: habit formation and re-engagement, not awareness. Must feel like a friend, not a bank.',
+   tags:['Goal: increase daily active users','Audience: 18-25, first-time earners','Budget: small — startup stage','Challenge: re-engagement not awareness']},
+  {name:'The Reel Room', tagline:'Independent cinema fighting for survival',
+   para:'Beloved independent Nashville cinema. Ticket sales down 35% since a multiplex opened. Leaning into cult classics, Q&As, themed nights, craft bar. Near-zero budget.',
+   tags:['Goal: drive ticket sales and loyalty','Audience: 25-45, local film lovers','Budget: near zero','Strength: community and experience']}
+];
+
+const bonusQs = [
+  {q:'A brand posts consistently but Facebook rarely shows content to followers. Most likely reason?',
+   opts:['Account is not verified','Facebook penalises corporate posts unless they generate strong engagement','Not using enough hashtags','Organic reach only works on Instagram'],
+   correct:1,note:'Platforms algorithmically limit corporate content in feeds. Paid advertising alongside posting is often needed to reach new customers.'},
+  {q:'Pawprint Rescue gets a post shared 50,000 times without paying. What type of media is this?',
+   opts:['Paid media','Owned media','Earned media','Co-created content'],
+   correct:2,note:'Earned media is unpaid publicity — shares, press, word of mouth. High upside but cannot be the sole foundation of a strategy.'},
+  {q:'FitNest has engagement up 40% but subscriptions are flat. Most likely cause?',
+   opts:['Ads shown to wrong audience','Engagement and conversion are different — content entertains but does not drive purchase','Follower count too low','Posting at wrong time'],
+   correct:1,note:'Engagement is necessary but not sufficient for sales. Entertainment content builds equity but utilitarian content drives conversion.'},
+  {q:'Which metric best measures whether a campaign drives loyalty, not just attention?',
+   opts:['Total follower count','Number of impressions','Purchase frequency and repeat conversion rate','Likes per post'],
+   correct:2,note:'Follower count and impressions measure reach. Loyalty is measured by behaviour — repeat purchases and direct attribution from social to conversion.'},
+  {q:'Stackr needs re-engagement not awareness. How does this change the social media strategy?',
+   opts:['It does not change anything','Target existing users with reminder and habit-forming content rather than reaching new audiences','Focus entirely on paid acquisition','Switch to LinkedIn'],
+   correct:1,note:'Re-engagement targets people who already have the app. Content must remind, reward, and rebuild habit — completely different objective and success metric.'}
+];
+
+// STATE
+let tab = 'strategy';
+let openGroup = null;
+let bonusAnswered = null;
+let bonusIdx = 0;
+let pts = [0,0,0,0,0,0];
+let votes = [0,0,0,0,0,0];
+let submissions = {};
+let hasVoted = false;
+let phase = 'waiting'; // waiting | round | pitching | voting | done
+let pitchingGroup = -1;
+let timerSec = 0;
+let timerInt = null;
+let prevSubs = '{}';
 
 function dbGet(path) {
   return new Promise((resolve) => {
@@ -155,199 +209,275 @@ function dbGet(path) {
   });
 }
 
-const brands = [
-  {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
-   para:'Groundwork started in a garage in Columbus eight years ago. Today: two cafes, loyal following. Secured investment to open eight new Midwest locations in 18 months. Problem: nobody outside Columbus knows them.',
-   tags:['Goal: awareness in new cities','Audience: 25-45, urban, values-driven','Budget: limited','No marketing team']},
-  {name:'FitNest', tagline:'Online personal training, no gym required',
-   para:'FitNest pairs users with certified trainers via live video. Faces fierce competition from Peloton and Apple Fitness. Zero physical presence — social media is their entire storefront.',
-   tags:['Goal: grow subscriptions','Audience: 28-42, results-focused','Budget: moderate','Trust must be built online']},
-  {name:'Pawprint Rescue', tagline:'Non-profit shelter, zero ad budget',
-   para:'Small non-profit shelter in Austin, TX. Relies on volunteers and donations. Goal: double adoptions. Zero paid advertising budget. Every result must come from organic content and earned goodwill.',
-   tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']},
-  {name:'ThreadLab', tagline:'Sustainable fashion going mainstream',
-   para:'ThreadLab has a cult eco-conscious following but wants to reach mainstream fashion shoppers. Never run paid campaigns. Risk: going too mainstream could alienate their loyal base.',
-   tags:['Goal: reach mainstream audience','Audience: 18-35, style-conscious','Budget: moderate — first paid campaign','Risk: losing existing community']},
-  {name:'Stackr', tagline:'Finance app for first-time earners',
-   para:'Free budgeting app, 50,000 downloads but very low daily active usage. The challenge is not awareness — it is habit formation and re-engagement. Must feel like a friend, not a bank.',
-   tags:['Goal: increase daily active users','Audience: 18-25, first-time earners','Budget: small — startup stage','Challenge: re-engagement not awareness']},
-  {name:'The Reel Room', tagline:'Independent cinema fighting for survival',
-   para:'Beloved independent Nashville cinema. Ticket sales down 35% since a multiplex opened nearby. Leaning into cult classics, director Q&As, themed nights, and a craft bar. Near-zero marketing budget.',
-   tags:['Goal: drive ticket sales and loyalty','Audience: 25-45, local film lovers','Budget: near zero','Strength: community and experience']}
-];
+async function dbPut(path, data) {
+  try {
+    const r = await fetch(DB + '/' + path + '.json', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+    return r.ok;
+  } catch(e) { return false; }
+}
 
-const fieldDefs = [
-  {key:'f0', label:'Objective', color:'#5b4fe8'},
-  {key:'f1', label:'Platform(s)', color:'#0d9e7a'},
-  {key:'f2', label:'Content idea', color:'#e05a3a'},
-  {key:'f3', label:'Measure success', color:'#c47f0a'}
-];
-
-const bonusQs = [
-  {q:'A brand posts consistently but Facebook rarely shows content to followers. Most likely reason?',
-   opts:['Account is not verified','Facebook penalises corporate posts unless they generate strong engagement','Not using enough hashtags','Organic reach only works on Instagram'],
-   correct:1, note:'Platforms like Facebook algorithmically limit corporate content in feeds. This is why paid advertising alongside organic posting is often needed to reach new customers.'},
-  {q:'Pawprint Rescue gets a post shared 50,000 times without paying. What type of media is this?',
-   opts:['Paid media','Owned media','Earned media','Co-created content'],
-   correct:2, note:'Earned media is unpaid publicity — shares, press, word of mouth. High upside but cannot be the sole foundation of a strategy.'},
-  {q:'FitNest has engagement up 40% but subscriptions are flat. Most likely cause?',
-   opts:['Ads shown to wrong audience','Engagement and conversion are different — content entertains but does not drive purchase','Follower count too low','Posting at wrong time'],
-   correct:1, note:'Engagement is necessary but not sufficient for sales. Entertainment content builds equity but utilitarian content drives conversion.'},
-  {q:'Which metric best measures whether a campaign drives loyalty, not just attention?',
-   opts:['Total follower count','Number of impressions','Purchase frequency and repeat conversion rate','Likes per post'],
-   correct:2, note:'Follower count and impressions measure reach. Loyalty is measured by behaviour — repeat purchases and direct attribution from social to conversion.'},
-  {q:'Stackr needs re-engagement not awareness. How does this change the social media strategy?',
-   opts:['It does not change anything — post more content','Target existing users with reminder and habit-forming content rather than reaching new audiences','Focus entirely on paid acquisition','Switch to LinkedIn'],
-   correct:1, note:'Re-engagement targets people who already downloaded the app. Content must remind, reward, and rebuild habit. Completely different objective, platform choice, and success metric.'}
-];
-
-let tab='task', openGroup=null, bonusAnswered=null, bonusIdx=0;
-let sec=600, running=false, iv=null;
-let votes=[0,0,0,0,0,0], pts=[0,0,0,0,0,0], submissions={}, hasVoted=false;
-let roundActive=false, prevSubs='{}';
+async function setState(newState) {
+  await dbPut('state', newState);
+}
 
 async function fetchState() {
-  const [subs, round] = await Promise.all([
-    dbGet('submissions'),
-    dbGet('roundActive')
-  ]);
-  const prev = JSON.stringify(submissions);
+  const [subs, st, liveVotes] = await Promise.all([dbGet('submissions'), dbGet('state'), dbGet('votes')]);
   submissions = subs || {};
-  roundActive = round === true;
 
-  // award 2 base pts on new submission
+  // award 2 base pts on new submissions
   Object.keys(submissions).forEach(i => {
     const idx = parseInt(i);
-    if (submissions[i]?.submitted && !JSON.parse(prev)[idx]?.submitted) {
+    if (submissions[i]?.submitted && !JSON.parse(prevSubs)[idx]?.submitted) {
       pts[idx] = (pts[idx]||0) + 2;
     }
   });
+  prevSubs = JSON.stringify(submissions);
+
+  if (st) {
+    phase = st.phase || 'waiting';
+    pitchingGroup = st.pitchingGroup !== undefined ? st.pitchingGroup : -1;
+    timerSec = st.timerSec || 0;
+  }
+
+  if (liveVotes) {
+    [0,1,2,3,4,5].forEach(i => { votes[i] = liveVotes[i] || 0; });
+  }
 
   renderBoard();
-  if (tab === 'task') renderTask();
+  renderPhaseBar();
+  renderPhaseControls();
+  if (tab === 'strategy') renderStrategy();
+  if (tab === 'vote') renderVote();
 
-  const lbl = document.getElementById('live-label');
-  lbl.className = 'live on';
-  lbl.innerHTML = '<span class="dot"></span>Live';
+  document.getElementById('live-label').className = 'live on';
+  document.getElementById('live-label').innerHTML = '<span class="dot"></span> Live';
 }
 
-async function toggleRound() {
-  roundActive = !roundActive;
-  try {
-    const res = await fetch(DB + '/roundActive.json', {
-      method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(roundActive)
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const btn = document.getElementById('start-btn');
-    btn.textContent = roundActive ? 'End round' : 'Start round';
-    btn.className = 'start-btn ' + (roundActive ? 'active' : 'inactive');
-    if (roundActive) { sec=600; running=false; clearInterval(iv); updateTimer(); }
-  } catch(e) {
-    roundActive = !roundActive;
-    alert('Failed to update round status: ' + e.message + '. Check your internet connection.');
+// ── TIMER ──
+function startTimer(secs) {
+  clearInterval(timerInt);
+  timerSec = secs;
+  updateTimerDisplay();
+  timerInt = setInterval(async () => {
+    if (timerSec > 0) {
+      timerSec--;
+      updateTimerDisplay();
+      // sync timer to Firebase every 5s so students see it
+      if (timerSec % 5 === 0) {
+        const st = await dbGet('state');
+        if (st) await setState({...st, timerSec});
+      }
+    } else {
+      clearInterval(timerInt);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSec/60), s = timerSec%60;
+  const el = document.getElementById('timer');
+  el.textContent = m + ':' + (s<10?'0':'') + s;
+  el.className = 'timer-display' + (timerSec <= 60 ? ' warn' : timerSec <= 180 ? '' : ' run');
+}
+
+// ── PHASE CONTROLS ──
+function renderPhaseControls() {
+  const el = document.getElementById('phase-controls');
+  let h = '';
+  if (phase === 'waiting') {
+    h = `<button class="phase-btn green" onclick="startRound()">▶ Start round (10 min)</button>`;
+  } else if (phase === 'round') {
+    h = `<button class="phase-btn purple" onclick="startPitching()">🎤 Start pitching</button>`;
+  } else if (phase === 'pitching') {
+    h = `<button class="phase-btn purple" onclick="prevGroup()" ${pitchingGroup===0?'disabled style="opacity:.4"':''}>← Prev group</button>
+         <button class="phase-btn purple" onclick="nextGroup()">Next group →</button>
+         <button class="phase-btn amber" onclick="startVoting()">🗳 Open voting (2 min)</button>`;
+  } else if (phase === 'voting') {
+    h = `<button class="phase-btn red" onclick="endVoting()">End voting</button>`;
+  } else if (phase === 'done') {
+    h = `<span style="font-size:13px;color:#0d9e7a;font-weight:700">✓ Round complete</span>`;
   }
+  el.innerHTML = h;
 }
 
+function renderPhaseBar() {
+  const labels = {waiting:'Setup',round:'Round — strategy task',pitching:'Pitch phase',voting:'Voting',done:'Done'};
+  const subs = {waiting:'Press Start round to begin',round:'Students are working on their strategies',pitching:'Groups present one at a time',voting:'Students are voting on their devices',done:'Award points and discuss'};
+  document.getElementById('phase-label').textContent = labels[phase] || phase;
+  document.getElementById('phase-sub').textContent = subs[phase] || '';
+}
+
+// ── PHASE ACTIONS ──
+async function startRound() {
+  await setState({phase:'round', pitchingGroup:-1, timerSec:600});
+  phase = 'round';
+  startTimer(600);
+  renderPhaseBar(); renderPhaseControls(); renderStrategy();
+}
+
+async function startPitching() {
+  clearInterval(timerInt);
+  const pg = 0;
+  await setState({phase:'pitching', pitchingGroup:pg, timerSec:0});
+  phase = 'pitching'; pitchingGroup = pg;
+  renderPhaseBar(); renderPhaseControls(); renderStrategy();
+}
+
+async function nextGroup() {
+  const next = Math.min(pitchingGroup+1, 5);
+  await setState({phase:'pitching', pitchingGroup:next, timerSec:0});
+  pitchingGroup = next;
+  renderPhaseControls(); renderStrategy();
+}
+
+async function prevGroup() {
+  const prev = Math.max(pitchingGroup-1, 0);
+  await setState({phase:'pitching', pitchingGroup:prev, timerSec:0});
+  pitchingGroup = prev;
+  renderPhaseControls(); renderStrategy();
+}
+
+async function startVoting() {
+  await dbPut('votes', null);
+  votes = [0,0,0,0,0,0];
+  await setState({phase:'voting', pitchingGroup:-1, timerSec:120});
+  phase = 'voting';
+  startTimer(120);
+  renderPhaseBar(); renderPhaseControls();
+  setTab('vote');
+}
+
+async function endVoting() {
+  clearInterval(timerInt);
+  await setState({phase:'done', pitchingGroup:-1, timerSec:0});
+  phase = 'done';
+  renderPhaseBar(); renderPhaseControls();
+}
+
+// ── SCOREBOARD ──
 function addPts(i,n){ pts[i]=Math.max(0,pts[i]+n); renderBoard(); }
 
-function renderBoard(){
-  const max=Math.max(...pts);
-  let h='';
-  for(let i=0;i<6;i++){
+function renderBoard() {
+  const max = Math.max(...pts);
+  let h = '';
+  for (let i=0;i<6;i++) {
     const lead=pts[i]===max&&max>0, sub=submissions[i]?.submitted;
-    h+=`<div class="scard${lead?' lead':''}${sub&&!lead?' sub':''}">
+    h += `<div class="scard${lead?' lead':''}${sub&&!lead?' sub':''}">
       ${lead?'<div class="crown">🏆</div>':''}
       <div class="sg">G${i+1}</div>
       <div class="sname">${brands[i].name}</div>
       ${sub?'<div class="sbadge">✓ In</div>':''}
       <div class="spts">${pts[i]}</div>
-      <div class="sadj">
-        <button class="m" onclick="addPts(${i},-1)">−</button>
-        <button class="p" onclick="addPts(${i},1)">+</button>
-      </div>
+      <div class="sadj"><button class="m" onclick="addPts(${i},-1)">−</button><button class="p" onclick="addPts(${i},1)">+</button></div>
     </div>`;
   }
-  document.getElementById('sboard').innerHTML=h;
+  document.getElementById('sboard').innerHTML = h;
 }
 
-function fmt(s){const m=Math.floor(s/60),sc=s%60;return `${m}:${sc<10?'0':''}${sc}`;}
-function setTab(t){
-  tab=t;
-  document.querySelectorAll('.tab').forEach(b=>b.className='tab');
-  ['task','vote','bonus'].forEach((k,i)=>{if(k===t)document.querySelectorAll('.tab')[i].className='tab on';});
+// ── TABS ──
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll('.tab').forEach(b => b.className='tab');
+  ['strategy','vote','bonus'].forEach((k,i) => { if(k===t) document.querySelectorAll('.tab')[i].className='tab on'; });
   renderScreen();
 }
-function toggleTimer(){
-  if(running){clearInterval(iv);running=false;}
-  else{running=true;iv=setInterval(()=>{if(sec>0)sec--;else{clearInterval(iv);running=false;}updateTimer();},1000);}
-  updateTimer();
+function renderScreen() {
+  if (tab==='strategy') renderStrategy();
+  else if (tab==='vote') renderVote();
+  else renderBonus();
 }
-function updateTimer(){
-  const el=document.getElementById('timer');
-  el.textContent=fmt(sec);
-  el.className='timer'+(sec===0?' done':sec<=120?' warn':running?' run':'');
-}
-function renderScreen(){if(tab==='task')renderTask();else if(tab==='vote')renderVote();else renderBonus();}
 
-function renderTask(){
-  const s=document.getElementById('screen');
-  let h='<div class="slabel">Click a group to view their submitted answers</div><div class="bgrid">';
-  brands.forEach((b,i)=>{
-    const sub=submissions[i]?.submitted, claimed=submissions[i]?.claimed, act=openGroup===i;
-    h+=`<div class="bcard${act?' on':''}${sub&&!act?' got':''}" id="gc${i}">
+// ── STRATEGY TAB ──
+function renderStrategy() {
+  const s = document.getElementById('screen');
+
+  if (phase === 'pitching') {
+    // show pitch view
+    renderPitchView(s);
+    return;
+  }
+
+  let h = '<div class="slabel">Click a group to view their answers</div><div class="bgrid">';
+  brands.forEach((b,i) => {
+    const sub = submissions[i]?.submitted;
+    const act = openGroup===i;
+    const isPitching = phase==='pitching' && pitchingGroup===i;
+    h += `<div class="bcard${act?' on':''}${sub&&!act?' got':''}${isPitching?' pitching':''}" id="gc${i}">
       <div class="bnum">Group ${i+1}</div>
       <div class="bname">${b.name}</div>
-      <div class="bstat${sub?' ok':claimed?' claimed':''}">${sub?'✓ Submitted':claimed?'In progress':'Waiting...'}</div>
+      <div class="bstat${sub?' ok':''}${isPitching?' pitching':''}">${isPitching?'🎤 Pitching now':sub?'✓ Submitted':'Waiting...'}</div>
     </div>`;
   });
-  h+='</div>';
-  if(openGroup===null){
-    h+='<div class="empty">Select a group card above to view their answers</div>';
+  h += '</div>';
+
+  if (openGroup===null) {
+    h += '<div class="empty">Select a group card above to view their answers</div>';
   } else {
-    const gi=openGroup,b=brands[gi],sub=submissions[gi],f=sub?.fields||{};
-    h+=`<div class="canvas">
+    const gi=openGroup, b=brands[gi], sub=submissions[gi], f=sub?.fields||{};
+    const pitch = sub?.pitch || '';
+    h += `<div class="canvas">
       <div class="chead">
-        <div class="cgnum">Group ${gi+1}</div>
-        <div class="cbname">${b.name}</div>
-        <div class="ctagline">${b.tagline}</div>
+        <div><div class="cgnum">Group ${gi+1}</div><div class="cbname">${b.name}</div><div class="ctagline">${b.tagline}</div></div>
       </div>
-      <div class="cbrief">
-        <p class="cpara">${b.para}</p>
-        <div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
-      </div>
+      <div class="cbrief"><p class="cpara">${b.para}</p><div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div>
       <div class="cfields">
-        ${fieldDefs.map(fd=>`<div class="cfield">
-          <div class="cflbl" style="color:${fd.color}">${fd.label}</div>
-          ${f[fd.key]?`<div class="cval">${f[fd.key]}</div>`:`<div class="cempty">${sub?.submitted?'Left blank':'Not submitted yet'}</div>`}
-        </div>`).join('')}
+        ${brands[gi] ? fieldDefs.map(fd=>`<div class="cfield"><div class="cflbl" style="color:${fd.color}">${fd.label}</div>${f[fd.key]?`<div class="cval">${f[fd.key]}</div>`:`<div class="cempty">${sub?.submitted?'Left blank':'Not submitted yet'}</div>`}</div>`).join('') : ''}
       </div>
+      ${pitch ? `<div style="padding:.75rem 1.25rem;background:#f0eeea;border-top:2px solid #e2dfd8"><div class="pitch-label">Pitch</div><div class="pitch-display">${pitch}</div></div>` : ''}
       <div class="cnav">
-        <button class="nb" onclick="openGroup=((${gi}-1)+6)%6;renderScreen()">← Prev</button>
+        <button class="nb" onclick="openGroup=((${gi}-1)+6)%6;renderStrategy()">← Prev</button>
         <div class="cnav-r">
-          <button class="nb" onclick="openGroup=(${gi}+1)%6;renderScreen()">Next →</button>
-          ${sub?.submitted?`
-            <button class="gb" onclick="awardVoteWin(${gi})">Vote win +${votes[gi]} pts</button>
-            <button class="pb" onclick="addPts(${gi},2);alert('Group ${gi+1} best content! +2 pts')">Best content +2</button>
-          `:'<span style="font-size:12px;color:#c5c3bb">Awaiting submission...</span>'}
+          <button class="nb" onclick="openGroup=(${gi}+1)%6;renderStrategy()">Next →</button>
+          ${sub?.submitted?`<button class="gb" onclick="awardVoteWin(${gi})">Vote win +${votes[gi]} pts</button><button class="pb" onclick="addPts(${gi},2);alert('Group ${gi+1} best content! +2 pts')">Best content +2</button>`:'<span style="font-size:12px;color:#c5c3bb">Awaiting submission...</span>'}
         </div>
       </div>
     </div>`;
   }
-  s.innerHTML=h;
-  brands.forEach((b,i)=>{const el=document.getElementById('gc'+i);if(el)el.onclick=()=>{openGroup=i;renderTask();};});
+  s.innerHTML = h;
+  brands.forEach((b,i) => { const el=document.getElementById('gc'+i); if(el) el.onclick=()=>{openGroup=i;renderStrategy();}; });
 }
 
-function renderVote(){
-  const s=document.getElementById('screen');
-  const total=votes.reduce((a,b)=>a+b,0);
-  const winner=total>0?votes.indexOf(Math.max(...votes)):-1;
-  let h=`<div class="info-bar">Each group gets <strong>+2 pts for submitting</strong>. After the class votes, award the winning group their vote count as bonus points on top.</div>
-  <div class="slabel">Which group had the strongest strategy?</div><div class="vgrid">`;
+const fieldDefs = [
+  {key:'f0',label:'Objective',color:'#5b4fe8'},
+  {key:'f1',label:'Platform(s)',color:'#0d9e7a'},
+  {key:'f2',label:'Content idea',color:'#e05a3a'},
+  {key:'f3',label:'Measure success',color:'#c47f0a'}
+];
+
+function renderPitchView(s) {
+  const gi = pitchingGroup;
+  const b = brands[gi];
+  const sub = submissions[gi];
+  const f = sub?.fields || {};
+  const pitch = sub?.pitch || '';
+  let h = `<div class="slabel" style="margin-bottom:.5rem">Now presenting — Group ${gi+1}</div>`;
+  h += `<div class="canvas">
+    <div class="chead">
+      <div><div class="cgnum">Group ${gi+1}</div><div class="cbname">${b.name}</div><div class="ctagline">${b.tagline}</div></div>
+    </div>
+    <div class="cfields">
+      ${fieldDefs.map(fd=>`<div class="cfield"><div class="cflbl" style="color:${fd.color}">${fd.label}</div>${f[fd.key]?`<div class="cval">${f[fd.key]}</div>`:`<div class="cempty">Not filled in</div>`}</div>`).join('')}
+    </div>
+    <div style="padding:1rem 1.25rem;background:#eeecfe;border-top:2px solid #5b4fe8">
+      <div class="pitch-label">Group pitch</div>
+      <div class="pitch-display" id="live-pitch" style="min-height:60px;font-size:17px">${pitch || '<span style="color:#c5c3bb;font-style:italic">Waiting for group to type their pitch...</span>'}</div>
+    </div>
+  </div>`;
+  s.innerHTML = h;
+}
+
+// ── VOTE TAB ──
+function renderVote() {
+  const s = document.getElementById('screen');
+  const total = votes.reduce((a,b)=>a+b,0);
+  const winner = total>0?votes.indexOf(Math.max(...votes)):-1;
+  let h = `<div class="info-bar">Each group gets <strong>+2 pts for submitting</strong>. After voting, award the winning group their vote count as bonus points.</div>
+  <div class="vgrid">`;
   for(let i=0;i<6;i++){
     h+=`<button class="vbtn${votes[i]>0?' voted':''}" onclick="castVote(${i})">
       <div style="font-size:12px;color:#6b6b8a;margin-bottom:3px">Group ${i+1}</div>
       <div style="font-size:14px;font-weight:700">${brands[i].name}</div>
+      ${votes[i]>0?`<div style="font-size:12px;color:#5b4fe8;margin-top:3px">${votes[i]} vote${votes[i]!==1?'s':''}</div>`:''}
     </button>`;
   }
   h+='</div>';
@@ -359,10 +489,10 @@ function renderVote(){
     }
     h+=`<div style="display:flex;gap:8px;margin-top:.875rem;flex-wrap:wrap">
       ${winner>=0?`<button class="pb" onclick="awardVoteWin(${winner})">Award Group ${winner+1} vote win (+${votes[winner]} pts)</button>`:''}
-      <button class="nb" onclick="resetVotes()">Reset votes</button>
+      <button class="nb" onclick="votes=[0,0,0,0,0,0];renderVote()">Reset votes</button>
     </div>`;
   }
-  h+=`<div class="steal"><div class="steal-head">⚡ Challenge steal — successful +2 pts, failed −1 pt</div>
+  h+=`<div class="steal"><div class="steal-head">⚡ Challenge steal — successful +2, failed −1</div>
     <div class="steal-body">
       <select id="sf"><option value="">Challenging group...</option>${[0,1,2,3,4,5].map(i=>`<option value="${i}">Group ${i+1} — ${brands[i].name}</option>`).join('')}</select>
       <select id="st"><option value="">Target group...</option>${[0,1,2,3,4,5].map(i=>`<option value="${i}">Group ${i+1} — ${brands[i].name}</option>`).join('')}</select>
@@ -375,60 +505,46 @@ function renderVote(){
 }
 
 function castVote(i){if(hasVoted)return;votes[i]++;hasVoted=true;renderVote();setTimeout(()=>{hasVoted=false;},600);}
-function awardVoteWin(i){const v=votes[i];addPts(i,v);alert('Group '+(i+1)+' wins the vote! +'+v+' pts added');resetVotes();}
-function resetVotes(){votes=[0,0,0,0,0,0];renderVote();}
-function doStealWin(){
-  const f=parseInt(document.getElementById('sf').value),t=parseInt(document.getElementById('st').value);
-  if(isNaN(f)||isNaN(t)){alert('Select both groups');return;}
-  addPts(f,2);addPts(t,-1);alert('Group '+(f+1)+' steals +2! Group '+(t+1)+' −1.');renderVote();
-}
-function doStealFail(){
-  const f=parseInt(document.getElementById('sf').value);
-  if(isNaN(f)){alert('Select the challenging group');return;}
-  addPts(f,-1);alert('Challenge failed! Group '+(f+1)+' −1 pt.');renderVote();
-}
+function awardVoteWin(i){const v=votes[i];addPts(i,v);alert('Group '+(i+1)+' wins the vote! +'+v+' pts');votes=[0,0,0,0,0,0];renderVote();}
+function doStealWin(){const f=parseInt(document.getElementById('sf').value),t=parseInt(document.getElementById('st').value);if(isNaN(f)||isNaN(t)){alert('Select both groups');return;}addPts(f,2);addPts(t,-1);alert('Group '+(f+1)+' steals +2! Group '+(t+1)+' −1.');renderVote();}
+function doStealFail(){const f=parseInt(document.getElementById('sf').value);if(isNaN(f)){alert('Select the challenging group');return;}addPts(f,-1);alert('Challenge failed! Group '+(f+1)+' −1 pt.');renderVote();}
 
+// ── BONUS TAB ──
 function renderBonus(){
   const s=document.getElementById('screen'),q=bonusQs[bonusIdx];
-  let h=`<div class="bnav">
-    <span class="qcount">Question ${bonusIdx+1} of ${bonusQs.length} — first correct answer <strong style="color:#c47f0a">+2 pts</strong></span>
+  let h=`<div class="bnav"><span class="qcount">Question ${bonusIdx+1} of ${bonusQs.length} — first correct answer <strong style="color:#c47f0a">+2 pts</strong></span>
     ${bonusIdx>0?`<button class="nb" onclick="bonusAnswered=null;bonusIdx--;renderBonus()">← Prev</button>`:''}
     ${bonusIdx<bonusQs.length-1?`<button class="nb" onclick="bonusAnswered=null;bonusIdx++;renderBonus()">Next →</button>`:''}
   </div>
   <div class="bcard2"><div class="bhead"><span>Bonus round</span><span style="font-size:13px;opacity:.85;font-weight:400">First correct answer +2 pts</span></div>
   <div class="bbody"><div class="bq">${q.q}</div>
-  <div class="bopts">${q.opts.map((o,i)=>{
-    let c='bopt';
-    if(bonusAnswered!==null)c+=i===q.correct?' correct':bonusAnswered===i?' wrong':'';
-    return `<button class="${c}"${bonusAnswered!==null?' disabled':''} onclick="bonusAnswered=${i};renderBonus()">${o}</button>`;
-  }).join('')}</div>
-  ${bonusAnswered!==null?`<div class="bnote">${q.note}</div>
-  <div style="margin-top:.875rem"><div class="slabel" style="margin-bottom:6px">Award to first group that answered correctly:</div>
-  <div class="pts-row">${[0,1,2,3,4,5].map(i=>`<button class="gb" onclick="addPts(${i},2);alert('Group ${i+1} bonus +2 pts!')">G${i+1}</button>`).join('')}</div></div>`:''}
+  <div class="bopts">${q.opts.map((o,i)=>{let c='bopt';if(bonusAnswered!==null)c+=i===q.correct?' correct':bonusAnswered===i?' wrong':'';return`<button class="${c}"${bonusAnswered!==null?' disabled':''} onclick="bonusAnswered=${i};renderBonus()">${o}</button>`;}).join('')}</div>
+  ${bonusAnswered!==null?`<div class="bnote">${q.note}</div><div style="margin-top:.875rem"><div class="slabel" style="margin-bottom:6px">Award to first group that answered correctly:</div><div class="pts-row">${[0,1,2,3,4,5].map(i=>`<button class="gb" onclick="addPts(${i},2);alert('Group ${i+1} bonus +2 pts!')">G${i+1}</button>`).join('')}</div></div>`:''}
   </div></div>`;
   s.innerHTML=h;
 }
 
 async function resetClass(){
-  if(!confirm('Reset everything for next class? This wipes all submissions and scores.'))return;
-  try{
-    await fetch(DB+'/submissions.json',{method:'DELETE'});
-    await fetch(DB+'/roundActive.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:'false'});
-    pts=[0,0,0,0,0,0];votes=[0,0,0,0,0,0];submissions={};prevSubs='{}';
-    roundActive=false;openGroup=null;bonusAnswered=null;bonusIdx=0;
-    sec=600;running=false;clearInterval(iv);updateTimer();
-    const btn=document.getElementById('start-btn');
-    btn.textContent='Start round';btn.className='start-btn inactive';
-    renderBoard();renderScreen();
-    alert('Reset complete — ready for next class!');
-  }catch(e){alert('Error resetting. Try again.');}
+  if(!confirm('Reset everything for next class?'))return;
+  clearInterval(timerInt);
+  await Promise.all([
+    dbPut('submissions', null),
+    dbPut('state', {phase:'waiting', pitchingGroup:-1, timerSec:0}),
+    dbPut('votes', null)
+  ]);
+  pts=[0,0,0,0,0,0];votes=[0,0,0,0,0,0];submissions={};prevSubs='{}';
+  phase='waiting';pitchingGroup=-1;timerSec=0;openGroup=null;bonusAnswered=null;bonusIdx=0;
+  document.getElementById('timer').textContent='10:00';
+  document.getElementById('timer').className='timer-display';
+  renderBoard();renderPhaseBar();renderPhaseControls();renderStrategy();
+  alert('Reset complete!');
 }
 
 fetchState();
-setInterval(fetchState,3000);
+setInterval(fetchState, 3000);
 renderBoard();
-renderScreen();
-updateTimer();
+renderStrategy();
+updateTimerDisplay();
 </script>
 </body>
 </html>
