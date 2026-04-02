@@ -86,8 +86,8 @@ button.ob{font-size:12px;padding:7px 14px;border:none;border-radius:7px;cursor:p
 /* VOTE */
 .info-bar{background:#fff;border:1.5px solid #e2dfd8;border-radius:10px;padding:.875rem 1.1rem;font-size:13px;color:#6b6b8a;margin-bottom:1rem}
 .info-bar strong{color:#1a1a2e}
-.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
-.vbtn{padding:.875rem;border:2px solid #e2dfd8;border-radius:10px;cursor:pointer;background:#fff;font-size:14px;font-weight:600;color:#1a1a2e;text-align:center;font-family:'DM Sans',sans-serif;transition:all .2s}
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem}
+.vbtn{padding:1rem;border:2px solid #e2dfd8;border-radius:10px;cursor:pointer;background:#fff;font-size:14px;font-weight:600;color:#1a1a2e;text-align:center;font-family:'DM Sans',sans-serif;transition:all .2s;line-height:1.4}
 .vbtn:hover{border-color:#5b4fe8;transform:translateY(-1px)}
 .vbtn.voted{border-color:#5b4fe8;background:#eeecfe;color:#5b4fe8}
 .vrow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
@@ -337,7 +337,8 @@ function renderVote(){
   <div class="slabel">Which group had the strongest strategy?</div><div class="vgrid">`;
   for(let i=0;i<6;i++){
     h+=`<button class="vbtn${votes[i]>0?' voted':''}" onclick="castVote(${i})">
-      Group ${i+1}<br><span style="font-size:11px;opacity:.7">${brands[i].name}</span>
+      <div style="font-size:12px;color:#6b6b8a;margin-bottom:3px">Group ${i+1}</div>
+      <div style="font-size:14px;font-weight:700">${brands[i].name}</div>
     </button>`;
   }
   h+='</div>';

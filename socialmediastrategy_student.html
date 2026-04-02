@@ -90,8 +90,9 @@ const fields = [
   {key:'f3', label:'Measure success', color:'#c47f0a', ph:'Two metrics that actually matter for this brand\'s goal. Why not just follower count?'}
 ];
 
-let myGroup = null;       // group index this student claimed
+let myGroup = null;
 let roundActive = false;
+let prevRoundActive = false;
 let submissions = {};
 let local = {};
 
@@ -102,8 +103,17 @@ async function fetchState() {
       fetch(DB + '/roundActive.json')
     ]);
     submissions = await subRes.json() || {};
-    roundActive = (await roundRes.json()) === true;
+    const newRoundActive = (await roundRes.json()) === true;
+    const roundJustStarted = newRoundActive && !prevRoundActive;
+    const roundJustEnded = !newRoundActive && prevRoundActive;
+    prevRoundActive = newRoundActive;
+    roundActive = newRoundActive;
     render();
+    if (roundJustStarted) {
+      // flash the group grid to draw attention
+      const gg = document.getElementById('gg');
+      if (gg) { gg.style.opacity='0'; setTimeout(()=>{gg.style.opacity='1';gg.style.transition='opacity .4s';},100); }
+    }
   } catch(e) {}
 }
 
@@ -111,8 +121,13 @@ function render() {
   const banner = document.getElementById('locked-banner');
   banner.style.display = roundActive ? 'none' : 'block';
   renderGroups();
-  if (myGroup !== null) renderCanvas();
-  else document.getElementById('canvas-area').innerHTML = '';
+  if (myGroup !== null) {
+    renderCanvas();
+  } else if (roundActive) {
+    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="border-color:#5b4fe8;color:#5b4fe8;font-weight:600">Select your group number above to get started</div>';
+  } else {
+    document.getElementById('canvas-area').innerHTML = '';
+  }
 }
 
 function renderGroups() {
@@ -123,38 +138,45 @@ function renderGroups() {
     const ismine = myGroup === i;
     const taken = !ismine && submissions[i] && submissions[i].claimed;
     const locked = !roundActive;
+    const alreadyChose = myGroup !== null && !ismine;
 
-    let cls = 'gcard';
-    let stat = 'Group ' + (i+1);
-    let statCls = '';
+    // determine if this card is clickable
+    const canClick = roundActive && !locked && !done && !taken && !alreadyChose && !ismine;
 
-    if (locked) { cls += ' disabled'; stat = 'Locked'; }
-    else if (done) { cls += ismine ? ' mine' : ' taken'; stat = ismine ? '✓ Submitted' : 'Submitted'; statCls = ismine ? ' ok' : ' taken'; }
-    else if (ismine) { cls += ' mine'; stat = 'Your group'; statCls = ' mine'; }
-    else if (taken) { cls += ' taken'; stat = 'Taken'; statCls = ' taken'; }
-    else { cls += ' available'; }
+    let bgColor = '#fff';
+    let borderColor = '#e2dfd8';
+    let statText = 'Available';
+    let statColor = '#6b6b8a';
+    let opacity = '1';
+    let cursor = canClick ? 'pointer' : 'default';
+    let pointerEvents = canClick ? 'auto' : 'none';
 
-    h += `<div class="${cls}" id="gc${i}">
-      <div class="gnum">${i+1}</div>
-      <div class="gname">${b.name}</div>
-      <div class="gstat${statCls}">${stat}</div>
+    if (locked || alreadyChose && !ismine) { opacity = '0.35'; statText = locked ? 'Locked' : 'N/A'; }
+    if (taken) { opacity = '0.4'; statText = 'Taken'; statColor = '#dc2626'; borderColor = '#fca5a5'; bgColor = '#fef2f2'; }
+    if (ismine) { bgColor = '#eeecfe'; borderColor = '#5b4fe8'; statText = done ? '✓ Submitted' : 'Your group'; statColor = done ? '#0d9e7a' : '#5b4fe8'; opacity = '1'; pointerEvents = 'none'; }
+    if (done && !ismine) { opacity = '0.4'; statText = 'Submitted'; statColor = '#0d9e7a'; borderColor = '#0d9e7a'; bgColor = '#e4f7f1'; }
+    if (canClick) { borderColor = '#e2dfd8'; bgColor = '#fff'; statText = 'Click to select'; statColor = '#5b4fe8'; }
+
+    h += `<div id="gc${i}" style="border:2px solid ${borderColor};border-radius:10px;padding:.75rem;background:${bgColor};text-align:center;opacity:${opacity};cursor:${cursor};pointer-events:${pointerEvents};transition:all .2s;">
+      <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:#1a1a2e">${i+1}</div>
+      <div style="font-size:11px;color:#6b6b8a;margin-top:2px">${b.name}</div>
+      <div style="font-size:11px;margin-top:3px;font-weight:600;color:${statColor}">${statText}</div>
     </div>`;
   });
   gg.innerHTML = h;
 
-  if (roundActive) {
-    brands.forEach((b, i) => {
-      const el = document.getElementById('gc' + i);
-      const done = submissions[i] && submissions[i].submitted;
-      const taken = myGroup === null && submissions[i] && submissions[i].claimed;
-      if (!el || done || taken || (myGroup !== null && myGroup !== i)) return;
-      if (myGroup === null) {
-        // can claim this group
-        el.onclick = () => claimGroup(i);
-      }
-      // if myGroup === i, clicking does nothing (already theirs)
-    });
-  }
+  // attach click handlers only to available cards
+  brands.forEach((b, i) => {
+    const canClick = roundActive && !submissions[i]?.claimed && myGroup === null;
+    if (!canClick) return;
+    const el = document.getElementById('gc' + i);
+    if (el) {
+      el.style.cursor = 'pointer';
+      el.onmouseenter = () => { el.style.borderColor = '#5b4fe8'; el.style.transform = 'translateY(-1px)'; };
+      el.onmouseleave = () => { el.style.borderColor = '#e2dfd8'; el.style.transform = 'none'; };
+      el.onclick = () => claimGroup(i);
+    }
+  });
 }
 
 async function claimGroup(i) {
@@ -247,7 +269,7 @@ function showMsg(text, type) {
 }
 
 fetchState();
-setInterval(fetchState, 4000);
+setInterval(fetchState, 2000);
 </script>
 </body>
 </html>
