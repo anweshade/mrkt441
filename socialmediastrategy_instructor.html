@@ -147,6 +147,7 @@ button.resetbtn:hover{background:#fef2f2}
     <button class="tab" onclick="setTab('vote')">Vote</button>
     <button class="tab" onclick="setTab('bonus')">Bonus</button>
   </div>
+  <button id="start-btn" onclick="toggleRound()" style="font-size:13px;padding:8px 18px;border:none;border-radius:8px;cursor:pointer;background:#16a34a;color:#fff;font-family:'DM Sans',sans-serif;font-weight:700">Start round</button>
   <div class="timer" id="timer" onclick="toggleTimer()">10:00</div>
 </div>
 
@@ -207,8 +208,24 @@ const bonusQs = [
 
 
 let tab='task', openGroup=null, openQ=null, bonusAnswered=null, bonusIdx=0;
+let roundActive = false;
 let sec=600, running=false, iv=null, firstDone=null;
 let votes=[0,0,0,0,0,0], pts=[0,0,0,0,0,0], submissions={}, hasVoted=false;
+
+async function toggleRound() {
+  roundActive = !roundActive;
+  const btn = document.getElementById('start-btn');
+  try {
+    await fetch(DB + '/roundActive.json', {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(roundActive)
+    });
+    btn.textContent = roundActive ? 'End round' : 'Start round';
+    btn.style.background = roundActive ? '#dc2626' : '#16a34a';
+    if (roundActive) { sec=600; updateTimer(); }
+  } catch(e) { roundActive = !roundActive; alert('Connection error'); }
+}
 
 async function fetchSubmissions() {
   try {
@@ -217,12 +234,12 @@ async function fetchSubmissions() {
     const prev = JSON.stringify(submissions);
     submissions = data || {};
 
-    // detect new submissions
+    // award 2 base points on submission
     Object.keys(submissions).forEach(i => {
       const idx = parseInt(i);
       if (submissions[i]?.submitted && !JSON.parse(prev)[i]?.submitted) {
-        pts[idx] = (pts[idx]||0) + 1;
-        if (firstDone === null) { firstDone = idx; pts[idx] += 2; }
+        pts[idx] = (pts[idx]||0) + 2;
+        if (firstDone === null) { firstDone = idx; }
       }
     });
 
@@ -353,7 +370,7 @@ function renderVote() {
   const s = document.getElementById('screen');
   const total = votes.reduce((a,b)=>a+b,0);
   const winner = total>0 ? votes.indexOf(Math.max(...votes)) : -1;
-  let h = `<div class="info-bar">Class votes for the strongest strategy. <strong>Winner gets +3 pts.</strong> Award best content idea bonus below.</div>
+  let h = `<div class="info-bar">Each group gets <strong>+2 pts for submitting</strong>. Votes are added on top — award the winning group their vote count as bonus points. Best content idea bonus below.</div>
   <div class="slabel">Which group had the strongest strategy?</div>
   <div class="vgrid">`;
   for (let i=0;i<6;i++) {
@@ -369,7 +386,7 @@ function renderVote() {
       h += `<div class="vrow"><div class="vlbl">Group ${j+1}</div><div class="vbar"><div class="vfill" style="width:${pct}%"></div></div><div class="vnum">${votes[j]}</div></div>`;
     }
     h += `<div style="display:flex;gap:8px;margin-top:.875rem;flex-wrap:wrap">
-      ${winner>=0?`<button class="pb" onclick="awardVote(${winner})">Award Group ${winner+1} vote win (+3 pts)</button>`:''}
+      ${winner>=0?`<button class="pb" onclick="awardVote(${winner})">Award Group ${winner+1} vote win (+${votes[winner]} pts)</button>`:''}
       <button class="nb" onclick="resetVotes()">Reset votes</button>
     </div>`;
   }
@@ -386,7 +403,12 @@ function renderVote() {
 }
 
 function castVote(i) { if(hasVoted)return; votes[i]++; hasVoted=true; renderVote(); setTimeout(()=>{hasVoted=false;},600); }
-function awardVote(i) { addPts(i,3); alert(`Group ${i+1} wins the vote! +3 pts`); resetVotes(); }
+function awardVote(i) {
+  const voteCount = votes[i];
+  addPts(i, voteCount);
+  alert('Group ' + (i+1) + ' wins the vote! +' + voteCount + ' pts (votes added to their score)');
+  resetVotes();
+}
 function resetVotes() { votes=[0,0,0,0,0,0]; renderVote(); }
 function doStealWin() {
   const f=parseInt(document.getElementById('sf').value), t=parseInt(document.getElementById('st').value);

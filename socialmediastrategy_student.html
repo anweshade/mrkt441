@@ -87,12 +87,16 @@ const fields = [
 let selected = null;
 let submitted = {};
 let local = {};
+let roundActive = false;
 
 async function fetchSubmissions() {
   try {
     const r = await fetch(DB + '/submissions.json');
     const data = await r.json();
     submitted = data || {};
+    // also check round status
+    const rr = await fetch(DB + '/roundActive.json');
+    roundActive = await rr.json();
     renderGroups();
     if (selected !== null) renderCanvas();
   } catch(e) {}
@@ -120,6 +124,10 @@ function renderGroups() {
 
 function renderCanvas() {
   if (selected === null) return;
+  if (!roundActive) {
+    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="background:#fef6e4;border-color:#c47f0a;color:#c47f0a;font-weight:600">Waiting for your instructor to start the round...</div>';
+    return;
+  }
   const gi = selected;
   const b = allBrands[gi];
   const done = submitted[gi] && submitted[gi].submitted;
