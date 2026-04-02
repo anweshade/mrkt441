@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRKT 441 — Strategy Task</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;padding:1rem;min-height:100vh}
+h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#5b4fe8;margin-bottom:4px}
+.sub{font-size:13px;color:#6b6b8a;margin-bottom:1.25rem}
+.group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
+.gcard{border:2px solid #e2dfd8;border-radius:10px;padding:.75rem;cursor:pointer;background:#fff;text-align:center;transition:all .2s}
+.gcard:hover{border-color:#5b4fe8}
+.gcard.on{border-color:#5b4fe8;background:#eeecfe}
+.gcard.done{border-color:#0d9e7a;background:#e4f7f1;cursor:default}
+.gnum{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#1a1a2e}
+.gname{font-size:11px;color:#6b6b8a;margin-top:2px}
+.gstat{font-size:11px;margin-top:3px;color:#6b6b8a;font-weight:600}
+.gstat.ok{color:#0d9e7a}
+.canvas{border:2px solid #e2dfd8;border-radius:12px;overflow:hidden;margin-top:1rem}
+.chead{background:#5b4fe8;padding:.875rem 1.1rem}
+.cgnum{font-size:11px;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.cbname{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff}
+.cbrief{padding:1rem 1.1rem;background:#f0eeea;border-bottom:2px solid #e2dfd8}
+.cpara{font-size:13px;line-height:1.7;color:#3a3a55;margin-bottom:8px}
+.ctags{display:flex;flex-wrap:wrap;gap:5px}
+.ctag{font-size:11px;background:#fff;color:#6b6b8a;padding:3px 9px;border-radius:20px;border:1px solid #e2dfd8}
+.cfields{background:#fff}
+.cfield{padding:.875rem 1.1rem;border-bottom:2px solid #e2dfd8}
+.cfield:last-child{border-bottom:none}
+.cflbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-family:'Syne',sans-serif}
+.cfield textarea{width:100%;min-height:72px;padding:8px;font-size:13px;border:1.5px solid #e2dfd8;border-radius:8px;background:#f5f4f0;color:#1a1a2e;resize:none;font-family:'DM Sans',sans-serif;line-height:1.5}
+.cfield textarea:focus{outline:none;border-color:#5b4fe8;background:#fff}
+.cfield textarea:disabled{opacity:.5}
+.cnav{padding:.875rem 1.1rem;background:#f0eeea;display:flex;justify-content:flex-end;gap:8px}
+button.pb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;background:#5b4fe8;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600}
+button.gb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;background:#16a34a;color:#fff;font-family:'DM Sans',sans-serif;font-weight:600}
+.msg{padding:.875rem;border-radius:10px;font-size:13px;margin-top:.875rem;text-align:center;font-weight:600}
+.msg.success{background:#e4f7f1;color:#0d9e7a;border:1.5px solid #0d9e7a}
+.msg.error{background:#fef2f2;color:#dc2626;border:1.5px solid #dc2626}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #e2dfd8;border-top-color:#5b4fe8;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:2rem;font-size:14px;color:#6b6b8a;border:2px dashed #e2dfd8;border-radius:12px;margin-top:1rem;background:#fff}
+</style>
+</head>
+<body>
+<h1>Social Media Strategy</h1>
+<p class="sub">MRKT 441 · Select your group, fill in all four sections, then submit</p>
+<div class="group-grid" id="gg"></div>
+<div id="canvas-area"><div class="empty">Select your group number above</div></div>
+<div id="msg"></div>
+
+<script>
+const DB = 'https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com';
+
+const brands = [
+  {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
+   para:'Groundwork started in a garage in Columbus, Ohio eight years ago. Today they have two cafes and a loyal following built on quality and sustainability. They just secured investment to open eight new locations across the Midwest in 18 months. Problem: outside Columbus, nobody knows them. They must build genuine awareness city by city, on a tight budget with no dedicated marketing team.',
+   tags:['Goal: awareness in new cities','Audience: 25–45, urban, values-driven','Budget: limited','No marketing team']},
+  {name:'FitNest', tagline:'Online personal training, no gym required',
+   para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. They face fierce competition from Peloton and Apple Fitness. Their edge is real personalisation — every plan is built by a human trainer. Audience: busy professionals 28–42. Critical fact: FitNest has zero physical presence. Social media is their entire storefront.',
+   tags:['Goal: grow subscriptions','Audience: 28–42, results-focused','Budget: moderate','Trust must be built online']},
+  {name:'Pawprint Rescue', tagline:'Non-profit shelter, zero ad budget',
+   para:'Pawprint Rescue is a small non-profit animal shelter in Austin, TX. They take in animals other shelters cannot accommodate and rely on volunteers and donations. Goal this year: double adoptions. The catch — zero budget for paid advertising. Every result must come from organic content and earned goodwill. Their greatest asset: every animal has a story.',
+   tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']}
+];
+const allBrands = brands.concat(brands);
+
+const fields = [
+  {key:'f0', label:'Objective', color:'#5b4fe8', ph:'What is the primary goal — acquisition, loyalty, or reputation? Why does that fit this brand right now?'},
+  {key:'f1', label:'Platform(s)', color:'#0d9e7a', ph:'Which 1–2 platforms? Justify with the brand\'s audience, budget, and objective.'},
+  {key:'f2', label:'Content idea', color:'#e05a3a', ph:'One specific post or campaign idea. What type of content is it — and what value does it give the audience?'},
+  {key:'f3', label:'Measure success', color:'#c47f0a', ph:'Two metrics that actually matter for this brand\'s goal. Why not just follower count?'}
+];
+
+let selected = null;
+let submitted = {};
+let local = {};
+
+async function fetchSubmissions() {
+  try {
+    const r = await fetch(DB + '/submissions.json');
+    const data = await r.json();
+    submitted = data || {};
+    renderGroups();
+    if (selected !== null) renderCanvas();
+  } catch(e) {}
+}
+
+function renderGroups() {
+  const gg = document.getElementById('gg');
+  let h = '';
+  allBrands.forEach((b, i) => {
+    const done = submitted[i] && submitted[i].submitted;
+    const act = selected === i;
+    h += `<div class="gcard${act?' on':''}${done&&!act?' done':''}" id="gc${i}">
+      <div class="gnum">${i+1}</div>
+      <div class="gname">${b.name.split(' ')[0]}</div>
+      <div class="gstat${done?' ok':''}">${done ? '✓ Submitted' : 'Group '+(i+1)}</div>
+    </div>`;
+  });
+  gg.innerHTML = h;
+  allBrands.forEach((b, i) => {
+    const el = document.getElementById('gc'+i);
+    const done = submitted[i] && submitted[i].submitted;
+    if (el && !done) el.onclick = () => { selected = i; renderCanvas(); renderGroups(); };
+  });
+}
+
+function renderCanvas() {
+  if (selected === null) return;
+  const gi = selected;
+  const b = allBrands[gi];
+  const done = submitted[gi] && submitted[gi].submitted;
+  const existing = (submitted[gi] && submitted[gi].fields) || local[gi] || {};
+  const ca = document.getElementById('canvas-area');
+  ca.innerHTML = `
+    <div class="canvas">
+      <div class="chead">
+        <div class="cgnum">Group ${gi+1}</div>
+        <div class="cbname">${b.name}</div>
+      </div>
+      <div class="cbrief">
+        <p class="cpara">${b.para}</p>
+        <div class="ctags">${b.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="cfields">
+        ${fields.map(f=>`
+          <div class="cfield">
+            <div class="cflbl" style="color:${f.color}">${f.label}</div>
+            <textarea id="ta_${f.key}" placeholder="${f.ph}" ${done?'disabled':''}>${existing[f.key]||''}</textarea>
+          </div>`).join('')}
+      </div>
+      <div class="cnav">
+        ${done
+          ? '<span style="font-size:13px;color:#0d9e7a;font-weight:700">✓ Submitted successfully</span>'
+          : `<button class="pb" id="save-btn">Save draft</button>
+             <button class="gb" id="submit-btn">Submit →</button>`}
+      </div>
+    </div>`;
+
+  if (!done) {
+    fields.forEach(f => {
+      const ta = document.getElementById('ta_' + f.key);
+      if (ta) ta.oninput = () => {
+        if (!local[gi]) local[gi] = {};
+        local[gi][f.key] = ta.value;
+      };
+    });
+    document.getElementById('save-btn').onclick = () => {
+      if (!local[gi]) local[gi] = {};
+      fields.forEach(f => { local[gi][f.key] = document.getElementById('ta_'+f.key)?.value || ''; });
+      showMsg('Draft saved!', 'success');
+    };
+    document.getElementById('submit-btn').onclick = () => submitGroup(gi, b);
+  }
+}
+
+async function submitGroup(gi, b) {
+  const f = {};
+  fields.forEach(field => { f[field.key] = document.getElementById('ta_'+field.key)?.value?.trim() || ''; });
+  if (Object.values(f).filter(v=>v).length < 2) { showMsg('Please fill in at least 2 sections first', 'error'); return; }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
+  try {
+    const res = await fetch(DB + `/submissions/${gi}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ submitted: true, fields: f, groupNum: gi+1, brandName: b.name, timestamp: Date.now() })
+    });
+    if (!res.ok) throw new Error();
+    showMsg(`Group ${gi+1} submitted! Your answers are now on the projector.`, 'success');
+    await fetchSubmissions();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit →';
+    showMsg('Connection error — check WiFi and try again', 'error');
+  }
+}
+
+function showMsg(text, type) {
+  document.getElementById('msg').innerHTML = `<div class="msg ${type}">${text}</div>`;
+  setTimeout(() => { document.getElementById('msg').innerHTML = ''; }, 4000);
+}
+
+fetchSubmissions();
+setInterval(fetchSubmissions, 5000);
+</script>
+</body>
+</html>
