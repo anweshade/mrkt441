@@ -58,15 +58,24 @@ const DB = 'https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com';
 const brands = [
   {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
    para:'Groundwork started in a garage in Columbus, Ohio eight years ago. Today they have two cafes and a loyal following built on quality and sustainability. They just secured investment to open eight new locations across the Midwest in 18 months. Problem: outside Columbus, nobody knows them. They must build genuine awareness city by city, on a tight budget with no dedicated marketing team.',
-   tags:['Goal: awareness in new cities','Audience: 25–45, urban, values-driven','Budget: limited','No marketing team']},
+   tags:['Goal: awareness in new cities','Audience: 25-45, urban, values-driven','Budget: limited','No marketing team']},
   {name:'FitNest', tagline:'Online personal training, no gym required',
    para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. They face fierce competition from Peloton and Apple Fitness. Their edge is real personalisation — every plan is built by a human trainer. Audience: busy professionals 28–42. Critical fact: FitNest has zero physical presence. Social media is their entire storefront.',
-   tags:['Goal: grow subscriptions','Audience: 28–42, results-focused','Budget: moderate','Trust must be built online']},
+   tags:['Goal: grow subscriptions','Audience: 28-42, results-focused','Budget: moderate','Trust must be built online']},
   {name:'Pawprint Rescue', tagline:'Non-profit shelter, zero ad budget',
    para:'Pawprint Rescue is a small non-profit animal shelter in Austin, TX. They take in animals other shelters cannot accommodate and rely on volunteers and donations. Goal this year: double adoptions. The catch — zero budget for paid advertising. Every result must come from organic content and earned goodwill. Their greatest asset: every animal has a story.',
-   tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']}
+   tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']},
+  {name:'ThreadLab', tagline:'Sustainable fashion brand going mainstream',
+   para:'ThreadLab makes affordable, sustainably produced clothing and has built a cult following among eco-conscious 18–28 year olds. They have strong organic reach on Instagram but have never run paid campaigns. Now they want to expand beyond their niche and reach mainstream fashion shoppers who care less about sustainability and more about style and price. The risk: going too mainstream could alienate their loyal base.',
+   tags:['Goal: reach mainstream fashion audience','Audience: 18-35, style-conscious','Budget: moderate — first paid campaign','Risk: losing existing community']},
+  {name:'Stackr', tagline:'Personal finance app for first-time earners',
+   para:'Stackr is a free budgeting and savings app aimed at 18–25 year olds entering the workforce for the first time. It has 50,000 downloads but very low daily active usage — people download it and then barely open it again. The challenge is not awareness, it is habit formation and re-engagement. Most competitors feel boring and corporate. Stackr wants to feel like a friend, not a bank.',
+   tags:['Goal: increase daily active users','Audience: 18-25, first-time earners','Budget: small — startup stage','Challenge: re-engagement not awareness']},
+  {name:'The Reel Room', tagline:'Independent cinema fighting for survival',
+   para:'The Reel Room is a beloved independent cinema in Nashville with one screen and a fiercely loyal audience of film lovers. Since a large multiplex opened nearby, ticket sales have dropped 35%. They cannot compete on blockbusters so they are leaning into what makes them special — cult classics, director Q&As, themed screening nights, and a craft cocktail bar. No marketing budget to speak of.',
+   tags:['Goal: drive ticket sales and loyalty','Audience: 25-45, local film lovers','Budget: near zero','Strength: community and experience']}
 ];
-const allBrands = brands.concat(brands);
+const allBrands = brands;
 
 const fields = [
   {key:'f0', label:'Objective', color:'#5b4fe8', ph:'What is the primary goal — acquisition, loyalty, or reputation? Why does that fit this brand right now?'},
