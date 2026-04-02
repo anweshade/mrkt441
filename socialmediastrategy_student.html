@@ -13,6 +13,7 @@ h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#5b4fe8;ma
 .group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
 .gcard{border:2px solid #e2dfd8;border-radius:10px;padding:.75rem;cursor:pointer;background:#fff;text-align:center;transition:all .2s}
 .gcard:hover{border-color:#5b4fe8}
+.gcard.locked{opacity:.4;cursor:not-allowed}
 .gcard.on{border-color:#5b4fe8;background:#eeecfe}
 .gcard.done{border-color:#0d9e7a;background:#e4f7f1;cursor:default}
 .gnum{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#1a1a2e}
@@ -49,7 +50,7 @@ button.gb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:p
 <h1>Social Media Strategy</h1>
 <p class="sub">MRKT 441 · Select your group, fill in all four sections, then submit</p>
 <div class="group-grid" id="gg"></div>
-<div id="canvas-area"><div class="empty">Select your group number above</div></div>
+<div id="canvas-area"><div class="empty" style="background:#fef6e4;border-color:#c47f0a;color:#c47f0a;font-weight:600;font-size:15px">⏳ Waiting for your instructor to start the round...</div></div>
 <div id="msg"></div>
 
 <script>
@@ -96,7 +97,7 @@ async function fetchSubmissions() {
     submitted = data || {};
     // also check round status
     const rr = await fetch(DB + '/roundActive.json');
-    roundActive = await rr.json();
+    roundActive = (await rr.json()) === true;
     renderGroups();
     if (selected !== null) renderCanvas();
   } catch(e) {}
@@ -108,13 +109,18 @@ function renderGroups() {
   allBrands.forEach((b, i) => {
     const done = submitted[i] && submitted[i].submitted;
     const act = selected === i;
-    h += `<div class="gcard${act?' on':''}${done&&!act?' done':''}" id="gc${i}">
+    const locked = !roundActive;
+    h += `<div class="gcard${act?' on':''}${done&&!act?' done':''}${locked?' locked':''}" id="gc${i}" style="${locked?'opacity:0.4;cursor:not-allowed;pointer-events:none;':''}">
       <div class="gnum">${i+1}</div>
       <div class="gname">${b.name.split(' ')[0]}</div>
       <div class="gstat${done?' ok':''}">${done ? '✓ Submitted' : 'Group '+(i+1)}</div>
     </div>`;
   });
   gg.innerHTML = h;
+  if (!roundActive) {
+    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="background:#fef6e4;border-color:#c47f0a;color:#c47f0a;font-weight:600;font-size:15px">⏳ Waiting for your instructor to start the round...</div>';
+    return;
+  }
   allBrands.forEach((b, i) => {
     const el = document.getElementById('gc'+i);
     const done = submitted[i] && submitted[i].submitted;
