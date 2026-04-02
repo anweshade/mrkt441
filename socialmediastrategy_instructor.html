@@ -143,6 +143,18 @@ button.resetbtn:hover{background:#fef2f2}
 <script>
 const DB = 'https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com';
 
+function dbGet(path) {
+  return new Promise((resolve) => {
+    const cb = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(() => { delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); resolve(null); }, 6000);
+    window[cb] = (data) => { clearTimeout(timeout); delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); resolve(data); };
+    const s = document.createElement('script');
+    s.onerror = () => { clearTimeout(timeout); delete window[cb]; resolve(null); };
+    s.src = DB + '/' + path + '.json?callback=' + cb;
+    document.head.appendChild(s);
+  });
+}
+
 const brands = [
   {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
    para:'Groundwork started in a garage in Columbus eight years ago. Today: two cafes, loyal following. Secured investment to open eight new Midwest locations in 18 months. Problem: nobody outside Columbus knows them.',
@@ -195,49 +207,46 @@ let votes=[0,0,0,0,0,0], pts=[0,0,0,0,0,0], submissions={}, hasVoted=false;
 let roundActive=false, prevSubs='{}';
 
 async function fetchState() {
-  try {
-    const [subRes, roundRes] = await Promise.all([
-      fetch(DB + '/submissions.json'),
-      fetch(DB + '/roundActive.json')
-    ]);
-    const newSubs = await subRes.json() || {};
-    roundActive = (await roundRes.json()) === true;
+  const [subs, round] = await Promise.all([
+    dbGet('submissions'),
+    dbGet('roundActive')
+  ]);
+  const prev = JSON.stringify(submissions);
+  submissions = subs || {};
+  roundActive = round === true;
 
-    // detect new submissions and award 2 base points
-    Object.keys(newSubs).forEach(i => {
-      const idx = parseInt(i);
-      if (newSubs[i]?.submitted && !JSON.parse(prevSubs)[idx]?.submitted) {
-        pts[idx] = (pts[idx]||0) + 2;
-      }
-    });
-    prevSubs = JSON.stringify(newSubs);
-    submissions = newSubs;
+  // award 2 base pts on new submission
+  Object.keys(submissions).forEach(i => {
+    const idx = parseInt(i);
+    if (submissions[i]?.submitted && !JSON.parse(prev)[idx]?.submitted) {
+      pts[idx] = (pts[idx]||0) + 2;
+    }
+  });
 
-    renderBoard();
-    if (tab === 'task') renderTask();
+  renderBoard();
+  if (tab === 'task') renderTask();
 
-    const lbl = document.getElementById('live-label');
-    lbl.className = 'live on';
-    lbl.innerHTML = '<span class="dot"></span>Live';
-  } catch(e) {
-    const lbl = document.getElementById('live-label');
-    lbl.className = 'live';
-    lbl.innerHTML = '<span class="dot"></span>Offline';
-  }
+  const lbl = document.getElementById('live-label');
+  lbl.className = 'live on';
+  lbl.innerHTML = '<span class="dot"></span>Live';
 }
 
 async function toggleRound() {
   roundActive = !roundActive;
   try {
-    await fetch(DB + '/roundActive.json', {
+    const res = await fetch(DB + '/roundActive.json', {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(roundActive)
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const btn = document.getElementById('start-btn');
     btn.textContent = roundActive ? 'End round' : 'Start round';
     btn.className = 'start-btn ' + (roundActive ? 'active' : 'inactive');
     if (roundActive) { sec=600; running=false; clearInterval(iv); updateTimer(); }
-  } catch(e) { roundActive = !roundActive; alert('Connection error'); }
+  } catch(e) {
+    roundActive = !roundActive;
+    alert('Failed to update round status: ' + e.message + '. Check your internet connection.');
+  }
 }
 
 function addPts(i,n){ pts[i]=Math.max(0,pts[i]+n); renderBoard(); }

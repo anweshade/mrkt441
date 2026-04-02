@@ -10,21 +10,21 @@
 body{background:#f5f4f0;color:#1a1a2e;font-family:'DM Sans',sans-serif;padding:1rem;min-height:100vh}
 h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#5b4fe8;margin-bottom:4px}
 .sub{font-size:13px;color:#6b6b8a;margin-bottom:1.25rem}
-.locked-banner{background:#fef6e4;border:2px solid #c47f0a;border-radius:12px;padding:1.25rem;text-align:center;font-size:15px;font-weight:700;color:#c47f0a;margin-bottom:1rem}
+.locked-banner{background:#fef6e4;border:2px solid #c47f0a;border-radius:12px;padding:1.25rem;text-align:center;font-size:16px;font-weight:700;color:#c47f0a;margin-bottom:1rem}
 .group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.25rem}
-.gcard{border:2px solid #e2dfd8;border-radius:10px;padding:.75rem;background:#fff;text-align:center;transition:all .2s}
+.gcard{border:2px solid #e2dfd8;border-radius:10px;padding:.875rem;background:#fff;text-align:center;transition:border .15s}
 .gcard.available{cursor:pointer}
 .gcard.available:hover{border-color:#5b4fe8;transform:translateY(-1px)}
-.gcard.mine{border-color:#5b4fe8;background:#eeecfe;cursor:default}
-.gcard.taken{opacity:.4;cursor:not-allowed;pointer-events:none}
-.gcard.done{border-color:#0d9e7a;background:#e4f7f1;cursor:default}
-.gcard.disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-.gnum{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#1a1a2e}
-.gname{font-size:11px;color:#6b6b8a;margin-top:2px}
-.gstat{font-size:11px;margin-top:3px;font-weight:600;color:#6b6b8a}
+.gcard.mine{border-color:#5b4fe8;background:#eeecfe}
+.gcard.taken{opacity:.4;background:#f9f9f9}
+.gcard.submitted{border-color:#0d9e7a;background:#e4f7f1}
+.gcard.locked{opacity:.3;pointer-events:none}
+.gnum{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#1a1a2e}
+.gname{font-size:11px;color:#6b6b8a;margin-top:2px;line-height:1.4}
+.gstat{font-size:11px;margin-top:4px;font-weight:600;color:#6b6b8a}
 .gstat.ok{color:#0d9e7a}
 .gstat.mine{color:#5b4fe8}
-.gstat.taken{color:#dc2626}
+.gstat.red{color:#dc2626}
 .canvas{border:2px solid #e2dfd8;border-radius:12px;overflow:hidden;margin-top:1rem}
 .chead{background:#5b4fe8;padding:.875rem 1.1rem}
 .cgnum{font-size:11px;color:rgba(255,255,255,.75);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
@@ -54,7 +54,7 @@ button.gb{font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:p
 <body>
 <h1>Social Media Strategy</h1>
 <p class="sub">MRKT 441 · Select your group, fill in all four sections, then submit</p>
-<div id="locked-banner" class="locked-banner" style="display:none">⏳ Waiting for your instructor to start the round...</div>
+<div id="locked-banner" class="locked-banner">⏳ Waiting for your instructor to start the round...</div>
 <div class="group-grid" id="gg"></div>
 <div id="canvas-area"></div>
 <div id="msg"></div>
@@ -64,22 +64,22 @@ const DB = 'https://social-media-strategy-5ccbb-default-rtdb.firebaseio.com';
 
 const brands = [
   {name:'Groundwork Coffee', tagline:'Regional roaster, big ambitions',
-   para:'Groundwork started in a garage in Columbus eight years ago. Today they have two cafes and a loyal following built on quality and sustainability. They secured investment to open eight new Midwest locations in 18 months. Problem: nobody outside Columbus knows them. They must build awareness city by city on a tight budget with no marketing team.',
+   para:'Groundwork started in a garage in Columbus eight years ago. Today they have two cafes and a loyal following. They secured investment to open eight new Midwest locations in 18 months. Problem: nobody outside Columbus knows them. They must build awareness city by city on a tight budget with no marketing team.',
    tags:['Goal: awareness in new cities','Audience: 25-45, urban, values-driven','Budget: limited','No marketing team']},
   {name:'FitNest', tagline:'Online personal training, no gym required',
-   para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. They face fierce competition from Peloton and Apple Fitness. Their edge is real personalisation — every plan built by a human trainer. Audience: busy professionals 28-42. Critical: FitNest has zero physical presence. Social media is their entire storefront.',
+   para:'FitNest pairs users with certified personal trainers via live video and on-demand workouts. They face fierce competition from Peloton and Apple Fitness. Their edge: every plan is built by a real human trainer. Audience: busy professionals 28-42. Critical: FitNest has zero physical presence — social media IS their storefront.',
    tags:['Goal: grow subscriptions','Audience: 28-42, results-focused','Budget: moderate','Trust must be built online']},
   {name:'Pawprint Rescue', tagline:'Non-profit shelter, zero ad budget',
-   para:'Pawprint Rescue is a small non-profit animal shelter in Austin, TX. They rely on volunteers and donations. Goal: double adoptions this year. Catch — zero paid advertising budget. Every result must come from organic content and earned goodwill. Their greatest asset: every animal has a story.',
+   para:'Pawprint Rescue is a small non-profit animal shelter in Austin, TX. They rely on volunteers and donations. Goal this year: double adoptions. Zero paid advertising budget. Every result must come from organic content and earned goodwill. Greatest asset: every animal has a story.',
    tags:['Goal: double adoptions','Audience: local community, all ages','Budget: zero — earned only','Small team, limited time']},
-  {name:'ThreadLab', tagline:'Sustainable fashion brand going mainstream',
-   para:'ThreadLab makes affordable sustainable clothing with a cult following among eco-conscious 18-28 year olds. Strong organic Instagram reach but no paid campaigns yet. Now they want to reach mainstream fashion shoppers who care more about style than sustainability. The risk: going too mainstream could alienate their loyal base.',
+  {name:'ThreadLab', tagline:'Sustainable fashion going mainstream',
+   para:'ThreadLab has a cult eco-conscious following but wants to reach mainstream fashion shoppers who care more about style than sustainability. Never run paid campaigns. Risk: going too mainstream could alienate their loyal base.',
    tags:['Goal: reach mainstream audience','Audience: 18-35, style-conscious','Budget: moderate — first paid campaign','Risk: losing existing community']},
-  {name:'Stackr', tagline:'Personal finance app for first-time earners',
-   para:'Stackr is a free budgeting app for 18-25 year olds entering the workforce. It has 50,000 downloads but very low daily active usage — people download it then barely open it again. The challenge is not awareness, it is habit formation and re-engagement. Most competitors feel boring and corporate. Stackr wants to feel like a friend, not a bank.',
+  {name:'Stackr', tagline:'Finance app for first-time earners',
+   para:'Stackr is a free budgeting app for 18-25 year olds. It has 50,000 downloads but very low daily active usage — people download it then barely open it again. The challenge is not awareness — it is habit formation and re-engagement. Most competitors feel boring and corporate. Stackr wants to feel like a friend, not a bank.',
    tags:['Goal: increase daily active users','Audience: 18-25, first-time earners','Budget: small — startup stage','Challenge: re-engagement not awareness']},
   {name:'The Reel Room', tagline:'Independent cinema fighting for survival',
-   para:'The Reel Room is a beloved independent cinema in Nashville with one screen and a fiercely loyal audience. Since a large multiplex opened nearby, ticket sales dropped 35%. They cannot compete on blockbusters so they are leaning into cult classics, director Q&As, themed nights, and a craft cocktail bar. Near-zero marketing budget.',
+   para:'The Reel Room is a beloved independent Nashville cinema. Since a large multiplex opened nearby, ticket sales dropped 35%. They are leaning into cult classics, director Q&As, themed nights, and a craft cocktail bar. Near-zero marketing budget.',
    tags:['Goal: drive ticket sales and loyalty','Audience: 25-45, local film lovers','Budget: near zero','Strength: community and experience']}
 ];
 
@@ -92,29 +92,48 @@ const fields = [
 
 let myGroup = null;
 let roundActive = false;
-let prevRoundActive = false;
 let submissions = {};
 let local = {};
+let polling = null;
+
+// Use JSONP to avoid CORS issues completely
+function dbGet(path) {
+  return new Promise((resolve) => {
+    const cb = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(() => { delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); resolve(null); }, 6000);
+    window[cb] = (data) => { clearTimeout(timeout); delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); resolve(data); };
+    const s = document.createElement('script');
+    s.onerror = () => { clearTimeout(timeout); delete window[cb]; resolve(null); };
+    s.src = DB + '/' + path + '.json?callback=' + cb;
+    document.head.appendChild(s);
+  });
+}
+
+async function dbPut(path, data) {
+  try {
+    const r = await fetch(DB + '/' + path + '.json', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
 
 async function fetchState() {
-  try {
-    const [subRes, roundRes] = await Promise.all([
-      fetch(DB + '/submissions.json'),
-      fetch(DB + '/roundActive.json')
-    ]);
-    submissions = await subRes.json() || {};
-    const newRoundActive = (await roundRes.json()) === true;
-    const roundJustStarted = newRoundActive && !prevRoundActive;
-    const roundJustEnded = !newRoundActive && prevRoundActive;
-    prevRoundActive = newRoundActive;
-    roundActive = newRoundActive;
-    render();
-    if (roundJustStarted) {
-      // flash the group grid to draw attention
-      const gg = document.getElementById('gg');
-      if (gg) { gg.style.opacity='0'; setTimeout(()=>{gg.style.opacity='1';gg.style.transition='opacity .4s';},100); }
-    }
-  } catch(e) {}
+  const [subs, round] = await Promise.all([
+    dbGet('submissions'),
+    dbGet('roundActive')
+  ]);
+  const wasActive = roundActive;
+  submissions = subs || {};
+  roundActive = round === true;
+  render();
+  // flash when round just started
+  if (!wasActive && roundActive) {
+    document.getElementById('gg').style.animation = 'none';
+    setTimeout(() => { document.getElementById('gg').style.animation = ''; }, 10);
+  }
 }
 
 function render() {
@@ -124,7 +143,7 @@ function render() {
   if (myGroup !== null) {
     renderCanvas();
   } else if (roundActive) {
-    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="border-color:#5b4fe8;color:#5b4fe8;font-weight:600">Select your group number above to get started</div>';
+    document.getElementById('canvas-area').innerHTML = '<div class="empty" style="border-color:#5b4fe8;color:#5b4fe8;font-weight:600">&#128204; Select your group number above to get started</div>';
   } else {
     document.getElementById('canvas-area').innerHTML = '';
   }
@@ -134,65 +153,58 @@ function renderGroups() {
   const gg = document.getElementById('gg');
   let h = '';
   brands.forEach((b, i) => {
-    const done = submissions[i] && submissions[i].submitted;
+    const sub = submissions[i] && submissions[i].submitted;
+    const claimed = submissions[i] && submissions[i].claimed;
     const ismine = myGroup === i;
-    const taken = !ismine && submissions[i] && submissions[i].claimed;
+    const taken = !ismine && claimed;
     const locked = !roundActive;
-    const alreadyChose = myGroup !== null && !ismine;
+    const alreadyPicked = myGroup !== null && !ismine;
 
-    // determine if this card is clickable
-    const canClick = roundActive && !locked && !done && !taken && !alreadyChose && !ismine;
+    let cls = 'gcard';
+    let stat = '';
+    let statCls = '';
 
-    let bgColor = '#fff';
-    let borderColor = '#e2dfd8';
-    let statText = 'Available';
-    let statColor = '#6b6b8a';
-    let opacity = '1';
-    let cursor = canClick ? 'pointer' : 'default';
-    let pointerEvents = canClick ? 'auto' : 'none';
+    if (locked) { cls += ' locked'; stat = 'Locked'; }
+    else if (sub && ismine) { cls += ' submitted'; stat = '&#10003; Submitted'; statCls = 'ok'; }
+    else if (sub && !ismine) { cls += ' taken locked'; stat = 'Submitted'; statCls = 'red'; }
+    else if (ismine) { cls += ' mine'; stat = 'Your group'; statCls = 'mine'; }
+    else if (taken) { cls += ' taken locked'; stat = 'Taken'; statCls = 'red'; }
+    else if (alreadyPicked) { cls += ' locked'; stat = ''; }
+    else { cls += ' available'; stat = 'Tap to select'; statCls = 'mine'; }
 
-    if (locked || alreadyChose && !ismine) { opacity = '0.35'; statText = locked ? 'Locked' : 'N/A'; }
-    if (taken) { opacity = '0.4'; statText = 'Taken'; statColor = '#dc2626'; borderColor = '#fca5a5'; bgColor = '#fef2f2'; }
-    if (ismine) { bgColor = '#eeecfe'; borderColor = '#5b4fe8'; statText = done ? '✓ Submitted' : 'Your group'; statColor = done ? '#0d9e7a' : '#5b4fe8'; opacity = '1'; pointerEvents = 'none'; }
-    if (done && !ismine) { opacity = '0.4'; statText = 'Submitted'; statColor = '#0d9e7a'; borderColor = '#0d9e7a'; bgColor = '#e4f7f1'; }
-    if (canClick) { borderColor = '#e2dfd8'; bgColor = '#fff'; statText = 'Click to select'; statColor = '#5b4fe8'; }
-
-    h += `<div id="gc${i}" style="border:2px solid ${borderColor};border-radius:10px;padding:.75rem;background:${bgColor};text-align:center;opacity:${opacity};cursor:${cursor};pointer-events:${pointerEvents};transition:all .2s;">
-      <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:800;color:#1a1a2e">${i+1}</div>
-      <div style="font-size:11px;color:#6b6b8a;margin-top:2px">${b.name}</div>
-      <div style="font-size:11px;margin-top:3px;font-weight:600;color:${statColor}">${statText}</div>
+    h += `<div class="${cls}" id="gc${i}">
+      <div class="gnum">${i+1}</div>
+      <div class="gname">${b.name}</div>
+      <div class="gstat ${statCls}">${stat}</div>
     </div>`;
   });
   gg.innerHTML = h;
 
-  // attach click handlers only to available cards
+  // attach click only to genuinely available cards
   brands.forEach((b, i) => {
-    const canClick = roundActive && !submissions[i]?.claimed && myGroup === null;
+    const claimed = submissions[i] && submissions[i].claimed;
+    const canClick = roundActive && !claimed && myGroup === null;
     if (!canClick) return;
     const el = document.getElementById('gc' + i);
-    if (el) {
-      el.style.cursor = 'pointer';
-      el.onmouseenter = () => { el.style.borderColor = '#5b4fe8'; el.style.transform = 'translateY(-1px)'; };
-      el.onmouseleave = () => { el.style.borderColor = '#e2dfd8'; el.style.transform = 'none'; };
-      el.onclick = () => claimGroup(i);
-    }
+    if (el) el.onclick = () => claimGroup(i);
   });
 }
 
 async function claimGroup(i) {
-  // check not already claimed
-  try {
-    const r = await fetch(DB + '/submissions/' + i + '.json');
-    const data = await r.json();
-    if (data && data.claimed) { showMsg('That group was just taken — pick another!', 'error'); fetchState(); return; }
-    await fetch(DB + '/submissions/' + i + '.json', {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ claimed: true, submitted: false, groupNum: i+1, brandName: brands[i].name })
-    });
+  // re-check Firebase before claiming
+  const current = await dbGet('submissions/' + i);
+  if (current && current.claimed) {
+    showMsg('That group was just taken — pick another!', 'error');
+    fetchState();
+    return;
+  }
+  const ok = await dbPut('submissions/' + i, { claimed: true, submitted: false, groupNum: i+1, brandName: brands[i].name });
+  if (ok) {
     myGroup = i;
     render();
-  } catch(e) { showMsg('Connection error — try again', 'error'); }
+  } else {
+    showMsg('Connection error — try again', 'error');
+  }
 }
 
 function renderCanvas() {
@@ -201,8 +213,7 @@ function renderCanvas() {
   const b = brands[gi];
   const done = submissions[gi] && submissions[gi].submitted;
   const existing = (submissions[gi] && submissions[gi].fields) || local[gi] || {};
-  const ca = document.getElementById('canvas-area');
-  ca.innerHTML = `
+  document.getElementById('canvas-area').innerHTML = `
     <div class="canvas">
       <div class="chead">
         <div class="cgnum">Group ${gi+1} — Your brand</div>
@@ -221,9 +232,9 @@ function renderCanvas() {
       </div>
       <div class="cnav">
         ${done
-          ? '<span style="font-size:13px;color:#0d9e7a;font-weight:700">✓ Submitted successfully</span>'
+          ? '<span style="font-size:13px;color:#0d9e7a;font-weight:700">&#10003; Submitted — check the projector!</span>'
           : `<button class="pb" id="save-btn">Save draft</button>
-             <button class="gb" id="submit-btn">Submit →</button>`}
+             <button class="gb" id="submit-btn">Submit &#8594;</button>`}
       </div>
     </div>`;
 
@@ -244,21 +255,20 @@ function renderCanvas() {
 async function submitGroup(gi) {
   const f = {};
   fields.forEach(field => { f[field.key] = document.getElementById('ta_' + field.key)?.value?.trim() || ''; });
-  if (Object.values(f).filter(v => v).length < 2) { showMsg('Please fill in at least 2 sections first', 'error'); return; }
+  if (Object.values(f).filter(v => v).length < 2) { showMsg('Fill in at least 2 sections first', 'error'); return; }
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
-  try {
-    await fetch(DB + '/submissions/' + gi + '.json', {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ claimed: true, submitted: true, fields: f, groupNum: gi+1, brandName: brands[gi].name, timestamp: Date.now() })
-    });
-    showMsg('Group ' + (gi+1) + ' submitted! Your answers are now on the projector.', 'success');
+  const ok = await dbPut('submissions/' + gi, {
+    claimed: true, submitted: true, fields: f,
+    groupNum: gi+1, brandName: brands[gi].name, timestamp: Date.now()
+  });
+  if (ok) {
+    showMsg('Submitted! Your answers are now on the projector.', 'success');
     fetchState();
-  } catch(e) {
+  } else {
     btn.disabled = false;
-    btn.innerHTML = 'Submit →';
+    btn.innerHTML = 'Submit &#8594;';
     showMsg('Connection error — check WiFi and try again', 'error');
   }
 }
